@@ -37,6 +37,28 @@
 
 namespace   ng = nanogui;
 
+bool ends_with(const std::string& s, const std::string& ending)
+{
+    if (s.length() >= ending.length())
+    {
+        return (0 == s.compare(s.length() - ending.length(), ending.length(), ending));
+    } else
+        return false;
+}
+
+std::unique_ptr<Model>
+load_model_by_filetype(const std::string& fn, ng::Window* window)
+{
+    if (ends_with(fn, ".vrt"))
+        return load_vertex_model(fn, window);
+    else if (ends_with(fn, ".edg"))
+        return load_edge_model(fn, window);
+    else if (ends_with(fn, ".tri"))
+        return load_triangle_model(fn, window);
+
+    return 0;
+}
+
 class VEFViewer: public ng::Screen
 {
     public:
@@ -55,13 +77,15 @@ class VEFViewer: public ng::Screen
             Button* b = new Button(tools, "Open");
             b->setCallback([&,window]
                            {
-                               auto fn = file_dialog({ {"vrt", "Vertices"}, {"tri", "Triangles"} }, false);
+                               auto fn = file_dialog({ {"vrt", "Vertices"}, {"edg", "Edges"}, {"tri", "Triangles"} }, false);
                                if (fn.empty())
                                    return;
-                               add_model(load_vertex_model(fn, window));
+                               add_model(load_model_by_filetype(fn, window));
                                recenter();
                                perform_layout();
                            });
+            b = new Button(tools, "Recenter");
+            b->setCallback([&] { recenter(true); });
 
             performLayout(mNVGContext);
             arcball_.setSize(size());
@@ -71,14 +95,14 @@ class VEFViewer: public ng::Screen
         void            add_model(std::unique_ptr<Model> m)         { models_.emplace_back(std::move(m)); }
         void            perform_layout()                            { performLayout(mNVGContext); }
         ng::Window*     model_window() const                        { return model_window_; }
-        void            recenter()
+        void            recenter(bool visible_only = false)
         {
             ng::Vector3f scene_min, scene_max;
-            std::tie(scene_min, scene_max) = scene_bbox();
+            std::tie(scene_min, scene_max) = scene_bbox(visible_only);
 
             center_ = scene_min + (scene_max - scene_min)/2;
 
-            if (scale_ == 0.)
+            if (scale_ == 0. || visible_only)
             {
                 float range = std::max({ scene_max[0] - scene_min[0],
                                          scene_max[1] - scene_min[1],
@@ -88,16 +112,22 @@ class VEFViewer: public ng::Screen
             }
         }
 
-        Model::BBox     scene_bbox() const
+        Model::BBox     scene_bbox(bool visible_only = false) const
         {
-            if (models_.empty())
+            auto it = models_.begin();
+            while (it != models_.end() && !(*it)->visible())
+                ++it;
+
+            if (it == models_.end())
                 return Model::BBox { ng::Vector3f::Zero(), ng::Vector3f::Zero() };
 
-            Model::BBox bbox = models_.front()->bbox();
+            Model::BBox bbox = (*it)->bbox();
             ng::Vector3f& scene_min = std::get<0>(bbox);
             ng::Vector3f& scene_max = std::get<1>(bbox);
             for (auto& m : models_)
             {
+                if (visible_only && !m->visible()) continue;
+
                 ng::Vector3f min, max;
                 std::tie(min,max) = m->bbox();
                 for (unsigned i = 0; i < 3; ++i)
@@ -183,13 +213,6 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    std::string fn;
-    while (ops >> PosOption(fn))
-    {
-        // determine filetype of fn and put it accordingly
-        vertex_filenames.push_back(fn);
-    }
-
     try
     {
         nanogui::init();
@@ -203,6 +226,11 @@ int main(int argc, char *argv[])
             app->add_model(load_triangle_model(fn, app->model_window()));
         for (auto& fn : edge_filenames)
             app->add_model(load_edge_model(fn, app->model_window()));
+
+        std::string fn;
+        while (ops >> PosOption(fn))
+            app->add_model(load_model_by_filetype(fn, app->model_window()));
+
         app->recenter();
         app->perform_layout();
 

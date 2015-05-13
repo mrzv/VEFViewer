@@ -6,6 +6,8 @@
 
 namespace       ng = nanogui;
 
+// TODO: currently doesn't use line_width_
+
 struct EdgeModel: public Model
 {
     typedef         std::tuple<unsigned,unsigned>                       Edge;
@@ -20,6 +22,11 @@ struct EdgeModel: public Model
                               const ng::Vector4f&     color       = { 0., 1., 1., 1. }):
                         Model(name, window), window_(window), line_width_(line_width), color_(color)
     {
+        //auto slider = new ng::Slider(window_);
+        //slider->setValue(line_width_/max_line_width_);
+        //slider->setCallback([this](float ls) { line_width_ = max_line_width_*ls; });
+
+
         ng::Vector3f min = points[0], max = points[0];
         for (auto& p : points)
         {
@@ -95,6 +102,7 @@ struct EdgeModel: public Model
         size_t                  n_;
         mutable ng::GLShader    shader_;
         float                   line_width_;
+        static constexpr float  max_line_width_ = 5.;
         ng::Vector4f            color_;
         ng::Window*             window_;
 };
