@@ -46,7 +46,8 @@ class VEFViewer: public ng::Screen
         {
             using namespace nanogui;
 
-            Window* window = new Window(this, "Models");
+            model_window_ = new Window(this, "Models");
+            Window* window = model_window_;
             window->setPosition(Vector2i(15, 15));
             window->setLayout(new GroupLayout());
 
@@ -58,9 +59,9 @@ class VEFViewer: public ng::Screen
                                auto fn = file_dialog({ {"vrt", "Vertices"}, {"tri", "Triangles"} }, false);
                                if (fn.empty())
                                    return;
-                               models_.emplace_back(load_vertex_model(fn, window));
-                               center_ = center();
-                               performLayout(mNVGContext);
+                               add_model(load_vertex_model(fn, window));
+                               recenter();
+                               perform_layout();
                            });
 
             performLayout(mNVGContext);
@@ -68,8 +69,16 @@ class VEFViewer: public ng::Screen
             setBackground({ .5, .5, .5 });
         }
 
+        void            add_model(std::unique_ptr<Model> m)         { models_.emplace_back(std::move(m)); }
+        void            perform_layout()                            { performLayout(mNVGContext); }
+        ng::Window*     model_window() const                        { return model_window_; }
+        void            recenter()                                  { center_ = center(); }
+
         ng::Vector3f    center() const
         {
+            if (models_.empty())
+                return ng::Vector3f::Zero();
+
             Model::BBox bbox = models_.front()->bbox();
             ng::Vector3f& scene_min = std::get<0>(bbox);
             ng::Vector3f& scene_max = std::get<1>(bbox);
@@ -135,6 +144,7 @@ class VEFViewer: public ng::Screen
         float                                   scale_ = 1.;
         ng::Arcball                             arcball_;
         ng::Vector3f                            center_ = ng::Vector3f::Zero();
+        ng::Window*                             model_window_;
 };
 
 int main(int argc, char *argv[])
@@ -142,12 +152,36 @@ int main(int argc, char *argv[])
     using namespace opts;
     Options ops(argc, argv);
 
+    std::vector<std::string>    vertex_filenames;
+    ops
+        >> Option('v', "vertex", vertex_filenames, "vertex file")
+    ;
+
+    if (ops >> Present('h', "help", "show help"))
+    {
+        std::cout << "Usage: " << argv[0] << " [OPTIONS] FILENAMES\n";
+        std::cout << ops;
+        return 1;
+    }
+
+    std::string fn;
+    while (ops >> PosOption(fn))
+    {
+        // determine filetype of fn and put it accordingly
+        vertex_filenames.push_back(fn);
+    }
+
     try
     {
         nanogui::init();
 
         VEFViewer* app = new VEFViewer();
         glEnable(GL_PROGRAM_POINT_SIZE);
+
+        for (auto& fn : vertex_filenames)
+            app->add_model(load_vertex_model(fn, app->model_window()));
+        app->recenter();
+        app->perform_layout();
 
         app->drawAll();
         app->setVisible(true);
