@@ -31,6 +31,8 @@
 #include <opts/opts.h>
 #include <format.h>
 
+#include <translation.h>
+
 #include <models/vertex-model.h>
 #include <models/edge-model.h>
 #include <models/triangle-model.h>
@@ -40,9 +42,8 @@ namespace   ng = nanogui;
 bool ends_with(const std::string& s, const std::string& ending)
 {
     if (s.length() >= ending.length())
-    {
         return (0 == s.compare(s.length() - ending.length(), ending.length(), ending));
-    } else
+    else
         return false;
 }
 
@@ -89,6 +90,7 @@ class VEFViewer: public ng::Screen
 
             performLayout(mNVGContext);
             arcball_.setSize(size());
+            translation_.setSize(size());
             setBackground({ .5, .5, .5 });
         }
 
@@ -110,6 +112,8 @@ class VEFViewer: public ng::Screen
                 scale_ = 1./range;
                 scale_factor_ = scale_/10;
             }
+
+            translation_.reset();
         }
 
         Model::BBox     scene_bbox(bool visible_only = false) const
@@ -149,14 +153,29 @@ class VEFViewer: public ng::Screen
             if (Screen::mouseButtonEvent(p,button,down,modifiers))
                 return true;
 
-            arcball_.button(p, down);
+            if (!down)
+            {
+                translation_.button(p, down);
+                arcball_.button(p, down);
+            } else
+            {
+                if (button == GLFW_MOUSE_BUTTON_1 && modifiers != GLFW_MOD_SHIFT)
+                    arcball_.button(p, down);
+                else if (button == GLFW_MOUSE_BUTTON_2 || (button == GLFW_MOUSE_BUTTON_1 && modifiers == GLFW_MOD_SHIFT))
+                    translation_.button(p, down);
+            }
+
 
             return true;
         }
 
         virtual bool    mouseMotionEvent(const nanogui::Vector2i &p, const nanogui::Vector2i &rel, int button, int modifiers)
         {
-            arcball_.motion(p);
+            if (arcball_.active())
+                arcball_.motion(p);
+            else if (translation_.active())
+                translation_.motion(p);
+
             return true;
         }
 
@@ -179,7 +198,7 @@ class VEFViewer: public ng::Screen
             translation.topRightCorner<3,1>() = -center_;
 
             ng::Matrix4f rotation     = arcball_.matrix(ng::Matrix4f());
-            mvp                      *= rotation * translation;
+            mvp                      *= translation_.matrix() * rotation * translation;
 
             for (auto& m : models_)
                 m->draw(mvp);
@@ -191,6 +210,7 @@ class VEFViewer: public ng::Screen
         ng::Arcball                             arcball_;
         ng::Vector3f                            center_ = ng::Vector3f::Zero();
         ng::Window*                             model_window_;
+        Translation                             translation_;
 };
 
 int main(int argc, char *argv[])
