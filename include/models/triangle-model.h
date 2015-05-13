@@ -46,10 +46,10 @@ struct TriangleModel: public Model
 
             /* Fragment shader */
             "#version 330\n"
-            "out vec4 output;\n"
+            "out vec4 clr;\n"
             "uniform vec4 color;\n"
             "void main() {\n"
-            "    output = color;\n"
+            "    clr = color;\n"
             "}"
         );
 
