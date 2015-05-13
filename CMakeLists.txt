@@ -30,5 +30,5 @@ elseif                  ("${CMAKE_SYSTEM}" MATCHES "Linux")
   find_library          (GLFW3_LIBRARY          glfw)
 endif                   ()
 
-add_executable          (VEFViewer      VEFViewer.cpp)
+add_executable          (VEFViewer      VEFViewer.cpp format.cc)
 target_link_libraries   (VEFViewer      ${NANOGUI_LIBRARY} ${GLFW3_LIBRARY} ${extra_libs})

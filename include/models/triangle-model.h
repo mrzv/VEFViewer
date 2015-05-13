@@ -1,20 +1,23 @@
-#ifndef VEFVIEWER_VERTEX_MODEL_H
-#define VEFVIEWER_VERTEX_MODEL_H
+#ifndef VEFVIEWER_TRIANGLE_MODEL_H
+#define VEFVIEWER_TRIANGLE_MODEL_H
 
 #include "model.h"
+#include <format.h>
 
 namespace       ng = nanogui;
 
-struct VertexModel: public Model
+struct TriangleModel: public Model
 {
-    typedef         std::vector<ng::Vector3f>       Points;
+    typedef         std::tuple<unsigned,unsigned,unsigned>              Triangle;
+    typedef         std::vector<ng::Vector3f>                           Points;
+    typedef         std::vector<Triangle>                               Triangles;
 
-                    VertexModel(const std::string&      name,
-                                const Points&           points,
-                                ng::Window*             window,
-                                float                   point_size  = 2.,
-                                const ng::Vector4f&     color       = { 0., 0., 1., 1. }):
-                        window_(window), point_size_(point_size), color_(color), visible_(true)
+                    TriangleModel(const std::string&      name,
+                                  const Points&           points,
+                                  const Triangles&        triangles,
+                                  ng::Window*             window,
+                                  const ng::Vector4f&     color       = { 1., 1., 0., .5 }):
+                        window_(window), color_(color), visible_(true)
     {
         new ng::Label(window_, name);
 
@@ -22,11 +25,6 @@ struct VertexModel: public Model
         b->setButtonFlags(ng::Button::ToggleButton);
         b->setPushed(visible_);
         b->setChangeCallback([this](bool state) { visible_ = state; });
-
-        auto slider = new ng::Slider(window_);
-        slider->setValue(point_size/max_point_size_);
-        slider->setCallback([this](float ps) { point_size_ = max_point_size_*ps; });
-
 
         ng::Vector3f min = points[0], max = points[0];
         for (auto& p : points)
@@ -49,10 +47,8 @@ struct VertexModel: public Model
             "#version 330\n"
             "uniform mat4 modelViewProj;\n"
             "in vec3 position;\n"
-            "uniform float point_size;\n"
             "void main() {\n"
             "    gl_Position = modelViewProj * vec4(position, 1.0);\n"
-            "    gl_PointSize = point_size;\n"
             "}",
 
             /* Fragment shader */
@@ -64,14 +60,19 @@ struct VertexModel: public Model
             "}"
         );
 
-        n_ = points.size();
-        ng::MatrixXu indices(n_, 1);
-        ng::MatrixXf positions(3, n_);
+        n_ = triangles.size();
+        ng::MatrixXu indices(3, triangles.size());
+        ng::MatrixXf positions(3, points.size());
         int i = 0;
         for (auto& p : points)
+            positions.col(i++) = p;
+
+        i = 0;
+        for (auto& tri : triangles)
         {
-            positions.col(i) = p;
-            indices(i,0) = i;
+            indices(0,i) = std::get<0>(tri);
+            indices(1,i) = std::get<1>(tri);
+            indices(2,i) = std::get<2>(tri);
             ++i;
         }
 
@@ -87,36 +88,38 @@ struct VertexModel: public Model
         {
             shader_.bind();
             shader_.setUniform("modelViewProj", mvp);
-            shader_.setUniform("point_size", point_size_);
-            shader_.drawIndexed(GL_POINTS, 0, n_);
+            shader_.drawIndexed(GL_TRIANGLES, 0, n_);
         }
     }
     virtual const BBox&     bbox() const                    { return bbox_; }
 
     private:
-                        VertexModel(const VertexModel&)   = delete;
-        VertexModel&    operator=(const VertexModel&)  = delete;
+                        TriangleModel(const TriangleModel&)   = delete;
+        TriangleModel&  operator=(const TriangleModel&)       = delete;
 
     private:
         BBox                    bbox_;
         size_t                  n_;
         mutable ng::GLShader    shader_;
         ng::Vector4f            color_;
-        float                   point_size_;
         ng::Window*             window_;
         bool                    visible_;
-        static constexpr float  max_point_size_ = 5.;
 };
 
 std::unique_ptr<Model>
-load_vertex_model(const std::string& fn, ng::Window* window)
+load_triangle_model(const std::string& fn, ng::Window* window)
 {
-    typedef     VertexModel::Points     Points;
+    typedef     TriangleModel::Points      Points;
+    typedef     TriangleModel::Triangles   Triangles;
+    typedef     TriangleModel::Triangle    Triangle;
 
     Points          points;
-    std::ifstream   in(fn.c_str());
-    std::string line;
+    Triangles       triangles;
 
+    std::ifstream   in(fn.c_str());
+    std::string     line;
+
+    size_t i = 0;
     while (std::getline(in, line))
     {
         if (line[0] == '#') continue;
@@ -124,9 +127,14 @@ load_vertex_model(const std::string& fn, ng::Window* window)
         float x,y,z;
         iss >> x >> y >> z;
         points.push_back({x,y,z});
+
+        if (i % 3 == 2)
+            triangles.push_back(Triangle { i - 2, i - 1, i });
+
+        ++i;
     }
 
-    return std::unique_ptr<Model>(new VertexModel(fn, points, window));
+    return std::unique_ptr<Model>(new TriangleModel(fn, points, triangles, window));
 }
 
 

@@ -29,14 +29,12 @@
 #include <memory>
 
 #include <opts/opts.h>
+#include <format.h>
 
 #include <models/vertex-model.h>
+#include <models/triangle-model.h>
 
 namespace   ng = nanogui;
-
-using std::cout;
-using std::cerr;
-using std::endl;
 
 class VEFViewer: public ng::Screen
 {
@@ -153,14 +151,15 @@ int main(int argc, char *argv[])
     Options ops(argc, argv);
 
     std::vector<std::string>    vertex_filenames;
+    std::vector<std::string>    triangle_filenames;
     ops
-        >> Option('v', "vertex", vertex_filenames, "vertex file")
+        >> Option('v', "vertex",    vertex_filenames,   "vertex file")
+        >> Option('t', "triangle",  triangle_filenames, "triangle file")
     ;
 
     if (ops >> Present('h', "help", "show help"))
     {
-        std::cout << "Usage: " << argv[0] << " [OPTIONS] FILENAMES\n";
-        std::cout << ops;
+        fmt::print("Usage: {} [OPTIONS] FILENAMES\n{}", argv[0], ops);
         return 1;
     }
 
@@ -180,6 +179,8 @@ int main(int argc, char *argv[])
 
         for (auto& fn : vertex_filenames)
             app->add_model(load_vertex_model(fn, app->model_window()));
+        for (auto& fn : triangle_filenames)
+            app->add_model(load_triangle_model(fn, app->model_window()));
         app->recenter();
         app->perform_layout();
 
@@ -197,7 +198,7 @@ int main(int argc, char *argv[])
         #if defined(WIN32)
             MessageBoxA(nullptr, error_msg.c_str(), NULL, MB_ICONERROR | MB_OK);
         #else
-            std::cerr << error_msg << endl;
+            fmt::print(std::cerr, "{}\n", error_msg);
         #endif
         return -1;
     }
