@@ -1,23 +1,24 @@
-#ifndef VEFVIEWER_TRIANGLE_MODEL_H
-#define VEFVIEWER_TRIANGLE_MODEL_H
+#ifndef VEFVIEWER_EDGE_MODEL_H
+#define VEFVIEWER_EDGE_MODEL_H
 
 #include "model.h"
 #include <format.h>
 
 namespace       ng = nanogui;
 
-struct TriangleModel: public Model
+struct EdgeModel: public Model
 {
-    typedef         std::tuple<unsigned,unsigned,unsigned>              Triangle;
+    typedef         std::tuple<unsigned,unsigned>                       Edge;
     typedef         std::vector<ng::Vector3f>                           Points;
-    typedef         std::vector<Triangle>                               Triangles;
+    typedef         std::vector<Edge>                                   Edges;
 
-                    TriangleModel(const std::string&      name,
-                                  const Points&           points,
-                                  const Triangles&        triangles,
-                                  ng::Window*             window,
-                                  const ng::Vector4f&     color       = { 1., 1., 0., .5 }):
-                        Model(name, window), window_(window), color_(color)
+                    EdgeModel(const std::string&      name,
+                              const Points&           points,
+                              const Edges&            edges,
+                              ng::Window*             window,
+                              float                   line_width  = 1.,
+                              const ng::Vector4f&     color       = { 0., 1., 1., 1. }):
+                        Model(name, window), window_(window), line_width_(line_width), color_(color)
     {
         ng::Vector3f min = points[0], max = points[0];
         for (auto& p : points)
@@ -53,19 +54,18 @@ struct TriangleModel: public Model
             "}"
         );
 
-        n_ = triangles.size();
-        ng::MatrixXu indices(3, triangles.size());
+        n_ = edges.size();
+        ng::MatrixXu indices(2, edges.size());
         ng::MatrixXf positions(3, points.size());
         int i = 0;
         for (auto& p : points)
             positions.col(i++) = p;
 
         i = 0;
-        for (auto& tri : triangles)
+        for (auto& edge : edges)
         {
-            indices(0,i) = std::get<0>(tri);
-            indices(1,i) = std::get<1>(tri);
-            indices(2,i) = std::get<2>(tri);
+            indices(0,i) = std::get<0>(edge);
+            indices(1,i) = std::get<1>(edge);
             ++i;
         }
 
@@ -81,32 +81,33 @@ struct TriangleModel: public Model
         {
             shader_.bind();
             shader_.setUniform("modelViewProj", mvp);
-            shader_.drawIndexed(GL_TRIANGLES, 0, n_);
+            shader_.drawIndexed(GL_LINES, 0, n_);
         }
     }
     virtual const BBox&     bbox() const                    { return bbox_; }
 
     private:
-                        TriangleModel(const TriangleModel&)   = delete;
-        TriangleModel&  operator=(const TriangleModel&)       = delete;
+                        EdgeModel(const EdgeModel&)   = delete;
+        EdgeModel&  operator=(const EdgeModel&)       = delete;
 
     private:
         BBox                    bbox_;
         size_t                  n_;
         mutable ng::GLShader    shader_;
+        float                   line_width_;
         ng::Vector4f            color_;
         ng::Window*             window_;
 };
 
 std::unique_ptr<Model>
-load_triangle_model(const std::string& fn, ng::Window* window)
+load_edge_model(const std::string& fn, ng::Window* window)
 {
-    typedef     TriangleModel::Points      Points;
-    typedef     TriangleModel::Triangles   Triangles;
-    typedef     TriangleModel::Triangle    Triangle;
+    typedef     EdgeModel::Points      Points;
+    typedef     EdgeModel::Edges       Edges;
+    typedef     EdgeModel::Edge        Edge;
 
     Points          points;
-    Triangles       triangles;
+    Edges           edges;
 
     std::ifstream   in(fn.c_str());
     std::string     line;
@@ -120,13 +121,13 @@ load_triangle_model(const std::string& fn, ng::Window* window)
         iss >> x >> y >> z;
         points.push_back({x,y,z});
 
-        if (i % 3 == 2)
-            triangles.push_back(Triangle { i - 2, i - 1, i });
+        if (i % 2 == 1)
+            edges.push_back(Edge { i - 1, i });
 
         ++i;
     }
 
-    return std::unique_ptr<Model>(new TriangleModel(fn, points, triangles, window));
+    return std::unique_ptr<Model>(new EdgeModel(fn, points, edges, window));
 }
 
 

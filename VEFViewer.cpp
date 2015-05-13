@@ -32,6 +32,7 @@
 #include <format.h>
 
 #include <models/vertex-model.h>
+#include <models/edge-model.h>
 #include <models/triangle-model.h>
 
 namespace   ng = nanogui;
@@ -70,12 +71,27 @@ class VEFViewer: public ng::Screen
         void            add_model(std::unique_ptr<Model> m)         { models_.emplace_back(std::move(m)); }
         void            perform_layout()                            { performLayout(mNVGContext); }
         ng::Window*     model_window() const                        { return model_window_; }
-        void            recenter()                                  { center_ = center(); }
+        void            recenter()
+        {
+            ng::Vector3f scene_min, scene_max;
+            std::tie(scene_min, scene_max) = scene_bbox();
 
-        ng::Vector3f    center() const
+            center_ = scene_min + (scene_max - scene_min)/2;
+
+            if (scale_ == 0.)
+            {
+                float range = std::max({ scene_max[0] - scene_min[0],
+                                         scene_max[1] - scene_min[1],
+                                         scene_max[2] - scene_min[2] });
+                scale_ = 1./range;
+                scale_factor_ = scale_/10;
+            }
+        }
+
+        Model::BBox     scene_bbox() const
         {
             if (models_.empty())
-                return ng::Vector3f::Zero();
+                return Model::BBox { ng::Vector3f::Zero(), ng::Vector3f::Zero() };
 
             Model::BBox bbox = models_.front()->bbox();
             ng::Vector3f& scene_min = std::get<0>(bbox);
@@ -92,7 +108,8 @@ class VEFViewer: public ng::Screen
                         scene_max[i] = max[i];
                 }
             }
-            return scene_min + (scene_max - scene_min)/2;
+
+            return bbox;
         }
 
         virtual void    draw(NVGcontext *ctx)                                   { Screen::draw(ctx); }
@@ -115,7 +132,7 @@ class VEFViewer: public ng::Screen
 
         virtual bool    scrollEvent(const ng::Vector2i &p, const ng::Vector2f &rel)
         {
-            scale_ += rel.y()/10;
+            scale_ += rel.y()*scale_factor_;
             if (scale_ < 0)
                 scale_ = 0;
             return true;
@@ -139,7 +156,8 @@ class VEFViewer: public ng::Screen
         }
     private:
         std::list<std::unique_ptr<Model>>       models_;
-        float                                   scale_ = 1.;
+        float                                   scale_ = 0.;
+        float                                   scale_factor_ = .1;
         ng::Arcball                             arcball_;
         ng::Vector3f                            center_ = ng::Vector3f::Zero();
         ng::Window*                             model_window_;
@@ -152,9 +170,11 @@ int main(int argc, char *argv[])
 
     std::vector<std::string>    vertex_filenames;
     std::vector<std::string>    triangle_filenames;
+    std::vector<std::string>    edge_filenames;
     ops
         >> Option('v', "vertex",    vertex_filenames,   "vertex file")
         >> Option('t', "triangle",  triangle_filenames, "triangle file")
+        >> Option('e', "edge",      edge_filenames,     "edge file")
     ;
 
     if (ops >> Present('h', "help", "show help"))
@@ -181,6 +201,8 @@ int main(int argc, char *argv[])
             app->add_model(load_vertex_model(fn, app->model_window()));
         for (auto& fn : triangle_filenames)
             app->add_model(load_triangle_model(fn, app->model_window()));
+        for (auto& fn : edge_filenames)
+            app->add_model(load_edge_model(fn, app->model_window()));
         app->recenter();
         app->perform_layout();
 

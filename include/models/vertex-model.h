@@ -14,15 +14,8 @@ struct VertexModel: public Model
                                 ng::Window*             window,
                                 float                   point_size  = 2.,
                                 const ng::Vector4f&     color       = { 0., 0., 1., 1. }):
-                        window_(window), point_size_(point_size), color_(color), visible_(true)
+                        Model(name, window), window_(window), point_size_(point_size), color_(color)
     {
-        new ng::Label(window_, name);
-
-        auto b = new ng::Button(window, "Visible");
-        b->setButtonFlags(ng::Button::ToggleButton);
-        b->setPushed(visible_);
-        b->setChangeCallback([this](bool state) { visible_ = state; });
-
         auto slider = new ng::Slider(window_);
         slider->setValue(point_size/max_point_size_);
         slider->setCallback([this](float ps) { point_size_ = max_point_size_*ps; });
@@ -83,7 +76,7 @@ struct VertexModel: public Model
 
     virtual void            draw(const Eigen::Matrix4f& mvp) const
     {
-        if (visible_)
+        if (visible())
         {
             shader_.bind();
             shader_.setUniform("modelViewProj", mvp);
@@ -104,7 +97,6 @@ struct VertexModel: public Model
         ng::Vector4f            color_;
         float                   point_size_;
         ng::Window*             window_;
-        bool                    visible_;
         static constexpr float  max_point_size_ = 5.;
 };
 
