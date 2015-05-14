@@ -12,14 +12,14 @@ struct VertexModel: public Model
                     VertexModel(const std::string&      name,
                                 const Points&           points,
                                 ng::Window*             window,
-                                float                   point_size  = 2.,
-                                const ng::Vector4f&     color       = { 0., 0., 1., 1. }):
-                        Model(name, window), window_(window), point_size_(point_size), color_(color)
+                                float                   point_size  = 2.):
+                        Model(name, window, { 0,0,1,1}),
+                        window_(window),
+                        point_size_(point_size)
     {
         auto slider = new ng::Slider(window_);
         slider->setValue(point_size/max_point_size_);
         slider->setCallback([this](float ps) { point_size_ = max_point_size_*ps; });
-
 
         ng::Vector3f min = points[0], max = points[0];
         for (auto& p : points)
@@ -71,7 +71,6 @@ struct VertexModel: public Model
         shader_.bind();
         shader_.uploadIndices(indices);
         shader_.uploadAttrib("position", positions);
-        shader_.setUniform("color", color_);
     }
 
     virtual void            draw(const Eigen::Matrix4f& mvp) const
@@ -81,6 +80,7 @@ struct VertexModel: public Model
             shader_.bind();
             shader_.setUniform("modelViewProj", mvp);
             shader_.setUniform("point_size", point_size_);
+            shader_.setUniform("color", color());
             shader_.drawIndexed(GL_POINTS, 0, n_);
         }
     }
@@ -94,7 +94,6 @@ struct VertexModel: public Model
         BBox                    bbox_;
         size_t                  n_;
         mutable ng::GLShader    shader_;
-        ng::Vector4f            color_;
         float                   point_size_;
         ng::Window*             window_;
         static constexpr float  max_point_size_ = 5.;

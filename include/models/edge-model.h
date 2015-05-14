@@ -18,9 +18,8 @@ struct EdgeModel: public Model
                               const Points&           points,
                               const Edges&            edges,
                               ng::Window*             window,
-                              float                   line_width  = 1.,
-                              const ng::Vector4f&     color       = { 0., 1., 1., 1. }):
-                        Model(name, window), window_(window), line_width_(line_width), color_(color)
+                              float                   line_width  = 1.):
+                        Model(name, window, { 0., 1., 1., 1. }), window_(window), line_width_(line_width)
     {
         //auto slider = new ng::Slider(window_);
         //slider->setValue(line_width_/max_line_width_);
@@ -79,7 +78,6 @@ struct EdgeModel: public Model
         shader_.bind();
         shader_.uploadIndices(indices);
         shader_.uploadAttrib("position", positions);
-        shader_.setUniform("color", color_);
     }
 
     virtual void            draw(const Eigen::Matrix4f& mvp) const
@@ -88,6 +86,7 @@ struct EdgeModel: public Model
         {
             shader_.bind();
             shader_.setUniform("modelViewProj", mvp);
+            shader_.setUniform("color", color());
             shader_.drawIndexed(GL_LINES, 0, n_);
         }
     }
@@ -103,7 +102,6 @@ struct EdgeModel: public Model
         mutable ng::GLShader    shader_;
         float                   line_width_;
         static constexpr float  max_line_width_ = 5.;
-        ng::Vector4f            color_;
         ng::Window*             window_;
 };
 

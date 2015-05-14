@@ -15,9 +15,8 @@ struct TriangleModel: public Model
                     TriangleModel(const std::string&      name,
                                   const Points&           points,
                                   const Triangles&        triangles,
-                                  ng::Window*             window,
-                                  const ng::Vector4f&     color       = { 1., 1., 0., .5 }):
-                        Model(name, window), window_(window), color_(color)
+                                  ng::Window*             window):
+                        Model(name, window, { 1., 1., 0., .5 }), window_(window)
     {
         ng::Vector3f min = points[0], max = points[0];
         for (auto& p : points)
@@ -72,7 +71,6 @@ struct TriangleModel: public Model
         shader_.bind();
         shader_.uploadIndices(indices);
         shader_.uploadAttrib("position", positions);
-        shader_.setUniform("color", color_);
     }
 
     virtual void            draw(const Eigen::Matrix4f& mvp) const
@@ -81,6 +79,7 @@ struct TriangleModel: public Model
         {
             shader_.bind();
             shader_.setUniform("modelViewProj", mvp);
+            shader_.setUniform("color", color());
             shader_.drawIndexed(GL_TRIANGLES, 0, n_);
         }
     }
@@ -94,7 +93,6 @@ struct TriangleModel: public Model
         BBox                    bbox_;
         size_t                  n_;
         mutable ng::GLShader    shader_;
-        ng::Vector4f            color_;
         ng::Window*             window_;
 };
 
