@@ -24,7 +24,7 @@ struct Model
         auto color_picker = new ng::PopupButton(window, "Color");
         auto popup = color_picker->popup();
         auto color_wheel = new ng::ColorWheel(popup, color_.topLeftCorner<3,1>());
-        color_wheel->setCallback([&](const ng::Vector3f& color) { color_.topLeftCorner<3,1>() = color; });
+        color_wheel->setCallback([this](const nanogui::Vector3f& color) { color_.topLeftCorner<3,1>() = color; });
     }
 
     virtual void            draw(const nanogui::Matrix4f& mvp) const    =0;
