@@ -239,6 +239,7 @@ int main(int argc, char *argv[])
 
         VEFViewer* app = new VEFViewer();
         glEnable(GL_PROGRAM_POINT_SIZE);
+        glEnable(GL_DEPTH_CLAMP);
 
         for (auto& fn : vertex_filenames)
             app->add_model(load_vertex_model(fn, app->model_window()));
