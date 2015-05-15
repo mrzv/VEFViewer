@@ -30,6 +30,11 @@ struct TriangleModel: public Model
             }
         }
 
+        auto b = new nanogui::Button(window, "Wireframe");
+        b->setButtonFlags(nanogui::Button::ToggleButton);
+        b->setPushed(wireframe_);
+        b->setChangeCallback([this](bool state) { wireframe_ = state; });
+
         bbox_ = BBox { min, max };
 
         shader_.init(
@@ -59,12 +64,13 @@ struct TriangleModel: public Model
         for (auto& p : points)
             positions.col(i++) = p;
 
+        typedef     Eigen::Matrix<unsigned, 3, 1>      Vector3u;
         i = 0;
         for (auto& tri : triangles)
         {
-            indices(0,i) = std::get<0>(tri);
-            indices(1,i) = std::get<1>(tri);
-            indices(2,i) = std::get<2>(tri);
+            unsigned v0,v1,v2;
+            std::tie(v0,v1,v2) = tri;
+            indices.col(i) = Vector3u { v0 - 1, v1 - 1, v2 - 1 };
             ++i;
         }
 
@@ -77,10 +83,14 @@ struct TriangleModel: public Model
     {
         if (visible())
         {
+            if (wireframe_)
+                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             shader_.bind();
             shader_.setUniform("modelViewProj", mvp);
             shader_.setUniform("color", color());
             shader_.drawIndexed(GL_TRIANGLES, 0, n_);
+            if (wireframe_)
+                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
     }
     virtual const BBox&     bbox() const                    { return bbox_; }
@@ -94,6 +104,7 @@ struct TriangleModel: public Model
         size_t                  n_;
         mutable ng::GLShader    shader_;
         ng::Window*             window_;
+        bool                    wireframe_ = false;
 };
 
 std::unique_ptr<Model>
@@ -127,5 +138,41 @@ load_triangle_model(const std::string& fn, ng::Window* window)
     return std::unique_ptr<Model>(new TriangleModel(fn, points, triangles, window));
 }
 
+std::unique_ptr<Model>
+load_object_model(const std::string& fn, ng::Window* window)
+{
+    typedef     TriangleModel::Points      Points;
+    typedef     TriangleModel::Triangles   Triangles;
+    typedef     TriangleModel::Triangle    Triangle;
+
+    Points          points;
+    Triangles       triangles;
+
+    std::ifstream   in(fn.c_str());
+    std::string     line;
+
+    while (std::getline(in, line))
+    {
+        if (line[0] == '#') continue;
+        if (line.empty()) continue;
+
+        std::istringstream  iss(line);
+        char t;
+        iss >> t;
+        if (t == 'v')
+        {
+            float x,y,z;
+            iss >> x >> y >> z;
+            points.push_back({x,y,z});
+        } else if (t == 'f')
+        {
+            int i,j,k;
+            iss >> i >> j >> k;
+            triangles.push_back(Triangle { i, j, k });
+        }
+    }
+
+    return std::unique_ptr<Model>(new TriangleModel(fn, points, triangles, window));
+}
 
 #endif
