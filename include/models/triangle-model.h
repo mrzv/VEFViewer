@@ -30,7 +30,7 @@ struct TriangleModel: public Model
             }
         }
 
-        auto b = new nanogui::Button(window, "Wireframe");
+        auto b = new ng::Button(tools_, "", ENTYPO_ICON_SHARE);
         b->setButtonFlags(nanogui::Button::ToggleButton);
         b->setPushed(wireframe_);
         b->setChangeCallback([this](bool state) { wireframe_ = state; });

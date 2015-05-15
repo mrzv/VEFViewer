@@ -5,6 +5,8 @@
 #include <nanogui/colorwheel.h>
 #include <nanogui/popupbutton.h>
 
+namespace ng = nanogui;
+
 struct Model
 {
     typedef std::tuple<nanogui::Vector3f, nanogui::Vector3f>            BBox;
@@ -16,7 +18,10 @@ struct Model
     {
         new nanogui::Label(window, name);
 
-        auto b = new nanogui::Button(window, "Visible");
+        tools_ = new ng::Widget(window);
+        tools_->setLayout(new ng::BoxLayout(ng::BoxLayout::Horizontal, ng::BoxLayout::Middle, 0, 6));
+
+        auto b = new ng::Button(tools_, "", ENTYPO_ICON_EYE);
         b->setButtonFlags(nanogui::Button::ToggleButton);
         b->setPushed(visible_);
         b->setChangeCallback([this](bool state) { visible_ = state; });
@@ -36,6 +41,7 @@ struct Model
 
     bool            visible_ = true;
     ng::Vector4f    color_;
+    ng::Widget*     tools_;
 };
 
 #endif
