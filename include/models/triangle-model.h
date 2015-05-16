@@ -59,6 +59,7 @@ struct TriangleModel: public Model
             "#version 330\n"
             "out vec4 clr;\n"
             "uniform vec4 color;\n"
+            "uniform float wireframe;\n"
             "smooth in vec3 n;\n"
             "smooth in vec4 position_;\n"
             "void main()\n"
@@ -66,6 +67,8 @@ struct TriangleModel: public Model
             "    // flat shading\n"
             "    vec3 ec_normal = normalize(cross(dFdx(vec3(position_)), dFdy(vec3(position_))));\n"
             "    clr.rgb = abs(vec3(color) * ec_normal[2]);\n"
+            "    float depth = ((position_.z / position_.w) + 1.0) * 0.5;\n"
+            "    clr.rgb = max(clr.rgb, vec3(color) * wireframe * (1 - depth));\n"
             ""
             "    // normal shading\n"
             "    //clr.rgb = abs(vec3(color) * (n[0] * .33 + n[1] * .33 + n[2] * .33));\n"
@@ -117,13 +120,19 @@ struct TriangleModel: public Model
     {
         if (visible())
         {
-            if (wireframe_)
-                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             shader_.bind();
+            if (wireframe_)
+            {
+                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+                shader_.setUniform("wireframe", 1.f);
+            } else
+                shader_.setUniform("wireframe", 0.f);
+
             shader_.setUniform("modelViewProj", mvp);
             shader_.setUniform("color", color());
 
             shader_.drawIndexed(GL_TRIANGLES, 0, n_);
+
             if (wireframe_)
                 glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
