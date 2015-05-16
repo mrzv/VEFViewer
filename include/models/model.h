@@ -32,7 +32,10 @@ struct Model
         color_wheel->setCallback([this](const nanogui::Vector3f& color) { color_.topLeftCorner<3,1>() = color; });
     }
 
-    virtual void            draw(const nanogui::Matrix4f& mvp) const    =0;
+    virtual void            draw(const ng::Matrix4f& mvp,
+                                 const ng::Matrix4f& model,
+                                 const ng::Matrix4f& view,
+                                 const ng::Matrix4f& projection) const  =0;
     virtual const BBox&     bbox() const                                =0;
 
     bool                    visible() const                             { return visible_; }

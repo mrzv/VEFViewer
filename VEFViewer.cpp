@@ -66,7 +66,8 @@ class VEFViewer: public ng::Screen
 {
     public:
         VEFViewer():
-            ng::Screen(Eigen::Vector2i(800, 600), "VEFViewer")
+            ng::Screen(Eigen::Vector2i(800, 600), "VEFViewer"),
+            arcball_(-2.)
         {
             using namespace nanogui;
 
@@ -191,19 +192,26 @@ class VEFViewer: public ng::Screen
 
         virtual void    drawContents()
         {
-            ng::Matrix4f mvp = ng::Matrix4f::Identity();
+            glEnable(GL_DEPTH_TEST);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glEnable(GL_DEPTH_CLAMP);
+            //glEnable(GL_LINE_SMOOTH);
 
-            mvp.topLeftCorner<3,3>() *= scale_;
-            mvp.row(0)               *= (float) mSize.y() / (float) mSize.x();
+            ng::Matrix4f projection = ng::Matrix4f::Identity();
 
-            ng::Matrix4f translation = ng::Matrix4f::Identity();
-            translation.topRightCorner<3,1>() = -center_;
+            projection.topLeftCorner<3,3>() *= scale_;
+            projection.row(0)               *= (float) mSize.y() / (float) mSize.x();
+
+            ng::Matrix4f model = ng::Matrix4f::Identity();
+            model.topRightCorner<3,1>() = -center_;
 
             ng::Matrix4f rotation     = arcball_.matrix(ng::Matrix4f());
-            mvp                      *= translation_.matrix() * rotation * translation;
+            ng::Matrix4f view         = translation_.matrix() * rotation;
+
+            ng::Matrix4f mvp          = projection * view * model;
 
             for (auto& m : models_)
-                m->draw(mvp);
+                m->draw(mvp, model, view, projection);
         }
     private:
         std::list<std::unique_ptr<Model>>       models_;
@@ -243,7 +251,10 @@ int main(int argc, char *argv[])
 
         VEFViewer* app = new VEFViewer();
         glEnable(GL_PROGRAM_POINT_SIZE);
-        glEnable(GL_DEPTH_CLAMP);
+
+        //glEnable(GL_BLEND);
+        //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 
         for (auto& fn : vertex_filenames)
             app->add_model(load_vertex_model(fn, app->model_window()));

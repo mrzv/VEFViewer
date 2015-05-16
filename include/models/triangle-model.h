@@ -16,7 +16,7 @@ struct TriangleModel: public Model
                                   const Points&           points,
                                   const Triangles&        triangles,
                                   ng::Window*             window):
-                        Model(name, window, { 1., 1., 0., .5 }), window_(window)
+                        Model(name, window, { 1., 1., 0., 1. }), window_(window)
     {
         ng::Vector3f min = points[0], max = points[0];
         for (auto& p : points)
@@ -37,6 +37,7 @@ struct TriangleModel: public Model
 
         bbox_ = BBox { min, max };
 
+        //shader_.initFromFiles(name, "vertex.glsl", "fragment.glsl");
         shader_.init(
             name,       // an identifying name
 
@@ -44,25 +45,50 @@ struct TriangleModel: public Model
             "#version 330\n"
             "uniform mat4 modelViewProj;\n"
             "in vec3 position;\n"
-            "void main() {\n"
+            "in vec3 normal;\n"
+            "smooth out vec3 n;\n"
+            "smooth out vec4 position_;\n"
+            "void main()\n"
+            "{\n"
             "    gl_Position = modelViewProj * vec4(position, 1.0);\n"
-            "}",
+            "    position_   = gl_Position;\n"
+            "    n = normalize(normal);\n"
+            "}\n",
 
             /* Fragment shader */
             "#version 330\n"
             "out vec4 clr;\n"
             "uniform vec4 color;\n"
-            "void main() {\n"
-            "    clr = color;\n"
-            "}"
+            "smooth in vec3 n;\n"
+            "smooth in vec4 position_;\n"
+            "void main()\n"
+            "{\n"
+            "    // flat shading\n"
+            "    vec3 ec_normal = normalize(cross(dFdx(vec3(position_)), dFdy(vec3(position_))));\n"
+            "    clr.rgb = abs(vec3(color) * ec_normal[2]);\n"
+            ""
+            "    // normal shading\n"
+            "    //clr.rgb = abs(vec3(color) * (n[0] * .33 + n[1] * .33 + n[2] * .33));\n"
+            "    //clr.rgb = abs(vec3(color) * n[2]);\n"
+            ""
+            "    // depth buffer shading\n"
+            "    //float depth = ((position_.z / position_.w) + 1.0) * 0.5;\n"
+            "    //clr.rgb = vec3(depth, depth, depth);\n"
+            ""
+            "    clr.a   = color.a;\n"
+            "}\n"
         );
 
         n_ = triangles.size();
         ng::MatrixXu indices(3, triangles.size());
+        ng::MatrixXf normals(3, points.size());
         ng::MatrixXf positions(3, points.size());
         int i = 0;
         for (auto& p : points)
-            positions.col(i++) = p;
+        {
+            positions.col(i) = p;
+            ++i;
+        }
 
         typedef     Eigen::Matrix<unsigned, 3, 1>      Vector3u;
         i = 0;
@@ -71,15 +97,23 @@ struct TriangleModel: public Model
             unsigned v0,v1,v2;
             std::tie(v0,v1,v2) = tri;
             indices.col(i) = Vector3u { v0 - 1, v1 - 1, v2 - 1 };
+            auto n = Eigen::Hyperplane<float,3>::Through(positions.col(v0 - 1), positions.col(v1 - 1), positions.col(v2 - 1)).normal();
+            normals.col(v0 - 1) += n;
+            normals.col(v1 - 1) += n;
+            normals.col(v2 - 1) += n;
             ++i;
         }
 
         shader_.bind();
         shader_.uploadIndices(indices);
         shader_.uploadAttrib("position", positions);
+        shader_.uploadAttrib("normal",   normals);
     }
 
-    virtual void            draw(const Eigen::Matrix4f& mvp) const
+    virtual void            draw(const ng::Matrix4f& mvp,
+                                 const ng::Matrix4f& model,
+                                 const ng::Matrix4f& view,
+                                 const ng::Matrix4f& projection) const
     {
         if (visible())
         {
@@ -88,6 +122,7 @@ struct TriangleModel: public Model
             shader_.bind();
             shader_.setUniform("modelViewProj", mvp);
             shader_.setUniform("color", color());
+
             shader_.drawIndexed(GL_TRIANGLES, 0, n_);
             if (wireframe_)
                 glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

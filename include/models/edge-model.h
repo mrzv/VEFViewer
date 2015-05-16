@@ -80,7 +80,10 @@ struct EdgeModel: public Model
         shader_.uploadAttrib("position", positions);
     }
 
-    virtual void            draw(const Eigen::Matrix4f& mvp) const
+    virtual void            draw(const ng::Matrix4f& mvp,
+                                 const ng::Matrix4f& model,
+                                 const ng::Matrix4f& view,
+                                 const ng::Matrix4f& projection) const
     {
         if (visible())
         {
