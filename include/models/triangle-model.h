@@ -99,11 +99,11 @@ struct TriangleModel: public Model
         {
             unsigned v0,v1,v2;
             std::tie(v0,v1,v2) = tri;
-            indices.col(i) = Vector3u { v0 - 1, v1 - 1, v2 - 1 };
-            auto n = Eigen::Hyperplane<float,3>::Through(positions.col(v0 - 1), positions.col(v1 - 1), positions.col(v2 - 1)).normal();
-            normals.col(v0 - 1) += n;
-            normals.col(v1 - 1) += n;
-            normals.col(v2 - 1) += n;
+            indices.col(i) = Vector3u { v0, v1, v2 };
+            auto n = Eigen::Hyperplane<float,3>::Through(positions.col(v0), positions.col(v1), positions.col(v2)).normal();
+            normals.col(v0) += n;
+            normals.col(v1) += n;
+            normals.col(v2) += n;
             ++i;
         }
 
@@ -168,6 +168,8 @@ load_triangle_model(const std::string& fn, ng::Window* window)
     while (std::getline(in, line))
     {
         if (line[0] == '#') continue;
+        if (line.empty()) continue;
+
         std::istringstream  iss(line);
         float x,y,z;
         iss >> x >> y >> z;
@@ -212,7 +214,7 @@ load_object_model(const std::string& fn, ng::Window* window)
         {
             int i,j,k;
             iss >> i >> j >> k;
-            triangles.push_back(Triangle { i, j, k });
+            triangles.push_back(Triangle { i - 1, j - 1, k - 1 });
         }
     }
 
