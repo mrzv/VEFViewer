@@ -81,7 +81,13 @@ class VEFViewer: public ng::Screen
             Button* b = new Button(tools, "Open");
             b->setCallback([&,window]
                            {
-                               auto fn = file_dialog({ {"vrt", "Vertices"}, {"edg", "Edges"}, {"tri", "Triangles"} }, false);
+                               auto fn = file_dialog({
+                                                        {"vrt", "Vertices"},
+                                                        {"edg", "Edges"},
+                                                        {"obj", "Object files"},
+                                                        {"tri", "Triangles"}
+                                                     },
+                                                     false);
                                if (fn.empty())
                                    return;
                                add_model(load_model_by_filetype(fn, window));
