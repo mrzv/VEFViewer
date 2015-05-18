@@ -112,13 +112,11 @@ class VEFViewer: public ng::Screen
             std::tie(scene_min, scene_max) = scene_bbox(visible_only);
 
             center_ = scene_min + (scene_max - scene_min)/2;
+            range_  = scene_max - scene_min;
 
             if (scale_ == 0. || visible_only)
             {
-                float range = std::max({ scene_max[0] - scene_min[0],
-                                         scene_max[1] - scene_min[1],
-                                         scene_max[2] - scene_min[2] });
-                scale_ = 1./range;
+                scale_ = 1.;
                 scale_factor_ = scale_/10;
             }
 
@@ -156,6 +154,13 @@ class VEFViewer: public ng::Screen
         }
 
         virtual void    draw(NVGcontext *ctx)                                   { Screen::draw(ctx); }
+
+
+        virtual void    framebufferSizeChanged()
+        {
+            arcball_.setSize(size());
+            translation_.setSize(size());
+        }
 
         virtual bool    mouseButtonEvent(const nanogui::Vector2i &p, int button, bool down, int modifiers)
         {
@@ -200,19 +205,19 @@ class VEFViewer: public ng::Screen
         {
             glEnable(GL_DEPTH_TEST);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            glEnable(GL_DEPTH_CLAMP);
-            //glEnable(GL_LINE_SMOOTH);
 
             ng::Matrix4f projection = ng::Matrix4f::Identity();
 
-            projection.topLeftCorner<3,3>() *= scale_;
+            projection.topLeftCorner<3,3>() /= range_.maxCoeff() / 1.9;
+            projection.topLeftCorner<2,2>() *= scale_;
             projection.row(0)               *= (float) mSize.y() / (float) mSize.x();
+            projection                      = translation_.matrix() * projection;
 
             ng::Matrix4f model = ng::Matrix4f::Identity();
             model.topRightCorner<3,1>() = -center_;
 
             ng::Matrix4f rotation     = arcball_.matrix(ng::Matrix4f());
-            ng::Matrix4f view         = translation_.matrix() * rotation;
+            ng::Matrix4f view         = rotation;
 
             ng::Matrix4f mvp          = projection * view * model;
 
@@ -225,6 +230,7 @@ class VEFViewer: public ng::Screen
         float                                   scale_factor_ = .1;
         ng::Arcball                             arcball_;
         ng::Vector3f                            center_ = ng::Vector3f::Zero();
+        ng::Vector3f                            range_;
         ng::Window*                             model_window_;
         Translation                             translation_;
 };

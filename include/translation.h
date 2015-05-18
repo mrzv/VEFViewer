@@ -18,8 +18,8 @@ struct Translation
         {
             if (active_)
             {
-                mat_(0,3) +=  float(last_.x() - start_.x()) / size_.x();
-                mat_(1,3) += -float(last_.y() - start_.y()) / size_.y();
+                mat_(0,3) +=  float(last_.x() - start_.x()) / size_.x() * 2;
+                mat_(1,3) += -float(last_.y() - start_.y()) / size_.y() * 2;
             }
             active_ = false;
         }
@@ -37,8 +37,8 @@ struct Translation
 
         res_ = mat_;
 
-        res_(0,3) +=  float(last_.x() - start_.x()) / size_.x();
-        res_(1,3) += -float(last_.y() - start_.y()) / size_.y();
+        res_(0,3) +=  float(last_.x() - start_.x()) / size_.x() * 2;
+        res_(1,3) += -float(last_.y() - start_.y()) / size_.y() * 2;
 
         return res_;
     }
