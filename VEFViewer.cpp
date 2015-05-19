@@ -104,11 +104,8 @@ class VEFViewer: public ng::Screen
             center_ = scene_min + (scene_max - scene_min)/2;
             range_  = scene_max - scene_min;
 
-            if (scale_ == 0. || visible_only)
-            {
-                scale_ = 1.;
-                scale_factor_ = scale_/10;
-            }
+            if (controls_.scale() == 0. || visible_only)
+                controls_.set_scale(1.);
 
             controls_.reset();
         }
@@ -168,9 +165,7 @@ class VEFViewer: public ng::Screen
 
         virtual bool    scrollEvent(const ng::Vector2i &p, const ng::Vector2f &rel)
         {
-            scale_ += rel.y()*scale_factor_;
-            if (scale_ < 0)
-                scale_ = 0;
+            controls_.scrollEvent(p, rel);
             return true;
         }
 
@@ -180,11 +175,9 @@ class VEFViewer: public ng::Screen
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             ng::Matrix4f projection = ng::Matrix4f::Identity();
-
             projection.topLeftCorner<3,3>() /= range_.maxCoeff() / 1.9;
-            projection.topLeftCorner<2,2>() *= scale_;
             projection.row(0)               *= (float) mSize.y() / (float) mSize.x();
-            projection                      = controls_.translation_matrix() * projection;
+            projection                       = controls_.projection(projection);
 
             ng::Matrix4f model = ng::Matrix4f::Identity();
             model.topRightCorner<3,1>() = -center_;
@@ -198,8 +191,6 @@ class VEFViewer: public ng::Screen
         }
     private:
         std::list<std::unique_ptr<Model>>       models_;
-        float                                   scale_ = 0.;
-        float                                   scale_factor_ = .1;
         Controls                                controls_;
         ng::Vector3f                            center_ = ng::Vector3f::Zero();
         ng::Vector3f                            range_;

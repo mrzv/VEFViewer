@@ -34,6 +34,16 @@ struct Controls: public ng::Arcball
             motion(p);
     }
 
+    virtual void    scrollEvent(const ng::Vector2i &p, const ng::Vector2f &rel)
+    {
+        scale_ += rel.y()*scale_factor_;
+        if (scale_ < 0)
+            scale_ = 0;
+    }
+
+    float           scale() const               { return scale_; }
+    void            set_scale(float s)          { scale_ = s; }
+
     void            button(const ng::Vector2i& p, bool down)
     {
         if (down)
@@ -54,6 +64,12 @@ struct Controls: public ng::Arcball
 
     void                motion(const ng::Vector2i& p)               { last_ = p; }
     void                reset()                                     { mat_ = ng::Matrix4f::Identity(); }
+
+    ng::Matrix4f        projection(ng::Matrix4f m) const
+    {
+        m.topLeftCorner<2,2>() *= scale_;
+        return translation_matrix() * m;
+    }
 
     const ng::Matrix4f& translation_matrix() const
     {
@@ -77,6 +93,8 @@ struct Controls: public ng::Arcball
     ng::Matrix4f            mat_;
     mutable ng::Matrix4f    res_;
     bool                    active_;
+    float                   scale_ = 0.;
+    float                   scale_factor_ = .1;
 };
 
 #endif
