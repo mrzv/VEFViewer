@@ -22,7 +22,7 @@
 #include <opts/opts.h>
 #include <format.h>
 
-#include <translation.h>
+#include <controls.h>
 
 #include <models/vertex-model.h>
 #include <models/edge-model.h>
@@ -58,7 +58,7 @@ class VEFViewer: public ng::Screen
     public:
         VEFViewer():
             ng::Screen(Eigen::Vector2i(800, 600), "VEFViewer"),
-            arcball_(-2.)
+            controls_(-2.)
         {
             using namespace nanogui;
 
@@ -89,8 +89,7 @@ class VEFViewer: public ng::Screen
             b->setCallback([&] { recenter(true); });
 
             performLayout(mNVGContext);
-            arcball_.setSize(size());
-            translation_.setSize(size());
+            controls_.setSize(size());
             setBackground({ .5, .5, .5 });
         }
 
@@ -111,7 +110,7 @@ class VEFViewer: public ng::Screen
                 scale_factor_ = scale_/10;
             }
 
-            translation_.reset();
+            controls_.reset();
         }
 
         Model::BBox     scene_bbox(bool visible_only = false) const
@@ -149,8 +148,7 @@ class VEFViewer: public ng::Screen
 
         virtual void    framebufferSizeChanged()
         {
-            arcball_.setSize(size());
-            translation_.setSize(size());
+            controls_.setSize(size());
         }
 
         virtual bool    mouseButtonEvent(const nanogui::Vector2i &p, int button, bool down, int modifiers)
@@ -158,29 +156,13 @@ class VEFViewer: public ng::Screen
             if (Screen::mouseButtonEvent(p,button,down,modifiers))
                 return true;
 
-            if (!down)
-            {
-                translation_.button(p, down);
-                arcball_.button(p, down);
-            } else
-            {
-                if (button == GLFW_MOUSE_BUTTON_1 && modifiers != GLFW_MOD_SHIFT)
-                    arcball_.button(p, down);
-                else if (button == GLFW_MOUSE_BUTTON_2 || (button == GLFW_MOUSE_BUTTON_1 && modifiers == GLFW_MOD_SHIFT))
-                    translation_.button(p, down);
-            }
-
-
+            controls_.mouseButtonEvent(p, button, down, modifiers);
             return true;
         }
 
         virtual bool    mouseMotionEvent(const nanogui::Vector2i &p, const nanogui::Vector2i &rel, int button, int modifiers)
         {
-            if (arcball_.active())
-                arcball_.motion(p);
-            else if (translation_.active())
-                translation_.motion(p);
-
+            controls_.mouseMotionEvent(p, rel, button, modifiers);
             return true;
         }
 
@@ -202,13 +184,12 @@ class VEFViewer: public ng::Screen
             projection.topLeftCorner<3,3>() /= range_.maxCoeff() / 1.9;
             projection.topLeftCorner<2,2>() *= scale_;
             projection.row(0)               *= (float) mSize.y() / (float) mSize.x();
-            projection                      = translation_.matrix() * projection;
+            projection                      = controls_.translation_matrix() * projection;
 
             ng::Matrix4f model = ng::Matrix4f::Identity();
             model.topRightCorner<3,1>() = -center_;
 
-            ng::Matrix4f rotation     = arcball_.matrix(ng::Matrix4f());
-            ng::Matrix4f view         = rotation;
+            ng::Matrix4f view         = controls_.rotation_matrix();
 
             ng::Matrix4f mvp          = projection * view * model;
 
@@ -219,11 +200,10 @@ class VEFViewer: public ng::Screen
         std::list<std::unique_ptr<Model>>       models_;
         float                                   scale_ = 0.;
         float                                   scale_factor_ = .1;
-        ng::Arcball                             arcball_;
+        Controls                                controls_;
         ng::Vector3f                            center_ = ng::Vector3f::Zero();
         ng::Vector3f                            range_;
         ng::Window*                             model_window_;
-        Translation                             translation_;
 };
 
 int main(int argc, char *argv[])
