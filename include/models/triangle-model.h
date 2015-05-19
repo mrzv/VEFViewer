@@ -4,6 +4,11 @@
 #include "model.h"
 #include <format.h>
 
+extern unsigned char triangle_vrt[];
+extern unsigned int  triangle_vrt_len;
+extern unsigned char triangle_frg[];
+extern unsigned int  triangle_frg_len;
+
 namespace       ng = nanogui;
 
 struct TriangleModel: public Model
@@ -40,46 +45,8 @@ struct TriangleModel: public Model
         //shader_.initFromFiles(name, "vertex.glsl", "fragment.glsl");
         shader_.init(
             name,       // an identifying name
-
-            /* Vertex shader */
-            "#version 330\n"
-            "uniform mat4 modelViewProj;\n"
-            "in vec3 position;\n"
-            "in vec3 normal;\n"
-            "smooth out vec3 n;\n"
-            "smooth out vec4 position_;\n"
-            "void main()\n"
-            "{\n"
-            "    gl_Position = modelViewProj * vec4(position, 1.0);\n"
-            "    position_   = gl_Position;\n"
-            "    n = normalize(normal);\n"
-            "}\n",
-
-            /* Fragment shader */
-            "#version 330\n"
-            "out vec4 clr;\n"
-            "uniform vec4 color;\n"
-            "uniform float wireframe;\n"
-            "smooth in vec3 n;\n"
-            "smooth in vec4 position_;\n"
-            "void main()\n"
-            "{\n"
-            "    // flat shading\n"
-            "    vec3 ec_normal = normalize(cross(dFdx(vec3(position_)), dFdy(vec3(position_))));\n"
-            "    clr.rgb = abs(vec3(color) * ec_normal[2]);\n"
-            "    float depth = ((position_.z / position_.w) + 1.0) * 0.5;\n"
-            "    clr.rgb = max(clr.rgb, vec3(color) * wireframe * (1 - depth));\n"
-            ""
-            "    // normal shading\n"
-            "    //clr.rgb = abs(vec3(color) * (n[0] * .33 + n[1] * .33 + n[2] * .33));\n"
-            "    //clr.rgb = abs(vec3(color) * n[2]);\n"
-            ""
-            "    // depth buffer shading\n"
-            "    //float depth = ((position_.z / position_.w) + 1.0) * 0.5;\n"
-            "    //clr.rgb = vec3(depth, depth, depth);\n"
-            ""
-            "    clr.a   = color.a;\n"
-            "}\n"
+            std::string(triangle_vrt, triangle_vrt + triangle_vrt_len),
+            std::string(triangle_frg, triangle_frg + triangle_frg_len)
         );
 
         n_ = triangles.size();

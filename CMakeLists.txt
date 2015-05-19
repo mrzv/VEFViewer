@@ -30,5 +30,23 @@ elseif                  ("${CMAKE_SYSTEM}" MATCHES "Linux")
   find_library          (GLFW3_LIBRARY          glfw)
 endif                   ()
 
-add_executable          (VEFViewer      VEFViewer.cpp format.cc)
+# Shaders
+function                (bin2c shader_name)
+    add_custom_command  (OUTPUT             ${CMAKE_BINARY_DIR}/${shader_name}.c
+                         COMMAND            xxd -i ${shader_name} ${CMAKE_BINARY_DIR}/${shader_name}.c
+                         WORKING_DIRECTORY  ${CMAKE_SOURCE_DIR}/shaders
+                         MAIN_DEPENDENCY    ${CMAKE_SOURCE_DIR}/shaders/${shader_name})
+endfunction             (bin2c)
+
+set                     (shader_sources
+                         vertex.vrt     vertex.frg
+                         edge.vrt       edge.frg
+                         triangle.vrt   triangle.frg)
+
+foreach                 (shader_source ${shader_sources})
+    bin2c               (${shader_source})
+    set                 (shaders ${shaders} ${shader_source}.c)
+endforeach              ()
+
+add_executable          (VEFViewer      VEFViewer.cpp format.cc ${shaders})
 target_link_libraries   (VEFViewer      ${NANOGUI_LIBRARY} ${GLFW3_LIBRARY} ${extra_libs})

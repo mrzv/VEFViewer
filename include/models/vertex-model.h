@@ -3,6 +3,11 @@
 
 #include "model.h"
 
+extern unsigned char vertex_vrt[];
+extern unsigned int  vertex_vrt_len;
+extern unsigned char vertex_frg[];
+extern unsigned int  vertex_frg_len;
+
 namespace       ng = nanogui;
 
 struct VertexModel: public Model
@@ -37,24 +42,8 @@ struct VertexModel: public Model
 
         shader_.init(
             name,       // an identifying name
-
-            /* Vertex shader */
-            "#version 330\n"
-            "uniform mat4 modelViewProj;\n"
-            "in vec3 position;\n"
-            "uniform float point_size;\n"
-            "void main() {\n"
-            "    gl_Position = modelViewProj * vec4(position, 1.0);\n"
-            "    gl_PointSize = point_size;\n"
-            "}",
-
-            /* Fragment shader */
-            "#version 330\n"
-            "out vec4 clr;\n"
-            "uniform vec4 color;\n"
-            "void main() {\n"
-            "    clr = color;\n"
-            "}"
+            std::string(vertex_vrt, vertex_vrt + vertex_vrt_len),
+            std::string(vertex_frg, vertex_frg + vertex_frg_len)
         );
 
         n_ = points.size();

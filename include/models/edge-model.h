@@ -4,6 +4,11 @@
 #include "model.h"
 #include <format.h>
 
+extern unsigned char edge_vrt[];
+extern unsigned int  edge_vrt_len;
+extern unsigned char edge_frg[];
+extern unsigned int  edge_frg_len;
+
 namespace       ng = nanogui;
 
 // TODO: currently doesn't use line_width_
@@ -42,22 +47,8 @@ struct EdgeModel: public Model
 
         shader_.init(
             name,       // an identifying name
-
-            /* Vertex shader */
-            "#version 330\n"
-            "uniform mat4 modelViewProj;\n"
-            "in vec3 position;\n"
-            "void main() {\n"
-            "    gl_Position = modelViewProj * vec4(position, 1.0);\n"
-            "}",
-
-            /* Fragment shader */
-            "#version 330\n"
-            "out vec4 clr;\n"
-            "uniform vec4 color;\n"
-            "void main() {\n"
-            "    clr = color;\n"
-            "}"
+            std::string(edge_vrt, edge_vrt + edge_vrt_len),
+            std::string(edge_frg, edge_frg + edge_frg_len)
         );
 
         n_ = edges.size();
