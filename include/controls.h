@@ -15,12 +15,36 @@ struct Controls: public ng::Arcball
     {
         if (!down)
         {
+            if (Arcball::active())
+            {
+                double dt    = glfwGetTime() - start_time_;
+                if (dt > 0)
+                {
+                    double speed = (p - start_).norm();
+                           speed /= dt;
+                    if (speed > 500)
+                    {
+                        spin_axis_ = Arcball::mIncr.vec().normalized();
+                        spin_angle_ = 2*std::acos(Arcball::mIncr.w());
+                        spin_time_ = glfwGetTime();
+                        spinning_ = true;
+                    }
+                }
+            }
             this->button(p, down);
             Arcball::button(p, down);
         } else
         {
             if (button == GLFW_MOUSE_BUTTON_1 && modifiers != GLFW_MOD_SHIFT)
+            {
+                start_time_ = glfwGetTime();
+                start_ = p;
+                if (spinning_)
+                    mQuat = (Eigen::AngleAxisf(spin_angle_ * (glfwGetTime() - spin_time_), spin_axis_) * mQuat).normalized();
+                spinning_  = false;
+
                 Arcball::button(p, down);
+            }
             else if (button == GLFW_MOUSE_BUTTON_2 || (button == GLFW_MOUSE_BUTTON_1 && modifiers == GLFW_MOD_SHIFT))
                 this->button(p, down);
         }
@@ -86,6 +110,12 @@ struct Controls: public ng::Arcball
 
     ng::Matrix4f rotation_matrix() const
     {
+        if (spinning_)
+        {
+            ng::Matrix4f m = ng::Matrix4f::Identity();
+            m.topLeftCorner<3,3>() = (Eigen::AngleAxisf(spin_angle_ * (glfwGetTime() - spin_time_), spin_axis_) * mQuat).normalized().toRotationMatrix();
+            return m;
+        }
         return Arcball::matrix(ng::Matrix4f());
     }
 
@@ -95,6 +125,10 @@ struct Controls: public ng::Arcball
     bool                    active_;
     float                   scale_ = 0.;
     float                   scale_factor_ = .1;
+    float                   spin_angle_;
+    ng::Vector3f            spin_axis_;
+    bool                    spinning_ = false;
+    double                  start_time_, spin_time_;
 };
 
 #endif
