@@ -2,6 +2,7 @@
 #define VEFVIEWER_VERTEX_MODEL_H
 
 #include "model.h"
+#include <format.h>
 
 extern unsigned char vertex_vrt[];
 extern unsigned int  vertex_vrt_len;
@@ -22,10 +23,18 @@ struct VertexModel: public Model
                         window_(window),
                         point_size_(point_size)
     {
-        auto slider = new ng::Slider(window_);
+        auto panel = new ng::Widget(window_);
+        panel->setLayout(new ng::BoxLayout(ng::BoxLayout::Horizontal, ng::BoxLayout::Middle, 0, 20));
+
+        auto slider = new ng::Slider(panel);
         slider->setValue(point_size/max_point_size_);
-        slider->setCallback([this](float ps) { point_size_ = max_point_size_*ps; });
         slider->setTooltip("point size");
+
+        auto textBox = new ng::TextBox(panel);
+        textBox->setFixedSize(ng::Vector2i(60, 25));
+        textBox->setValue(fmt::format("{:.2f}", point_size_));
+
+        slider->setCallback([this,textBox](float ps) { point_size_ = max_point_size_*ps; textBox->setValue(fmt::format("{:.2f}", point_size_)); });
 
         ng::Vector3f min = points[0], max = points[0];
         for (auto& p : points)
