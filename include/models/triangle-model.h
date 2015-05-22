@@ -39,6 +39,7 @@ struct TriangleModel: public Model
         b->setButtonFlags(nanogui::Button::ToggleButton);
         b->setPushed(wireframe_);
         b->setChangeCallback([this](bool state) { wireframe_ = state; });
+        b->setTooltip("wireframe");
 
         bbox_ = BBox { min, max };
 

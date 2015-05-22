@@ -25,6 +25,7 @@ struct VertexModel: public Model
         auto slider = new ng::Slider(window_);
         slider->setValue(point_size/max_point_size_);
         slider->setCallback([this](float ps) { point_size_ = max_point_size_*ps; });
+        slider->setTooltip("point size");
 
         ng::Vector3f min = points[0], max = points[0];
         for (auto& p : points)
