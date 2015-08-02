@@ -163,6 +163,20 @@ class VEFViewer: public ng::Screen
             return true;
         }
 
+        virtual bool keyboardEvent(int key, int scancode, bool press, int modifiers)
+        {
+            if (Screen::keyboardEvent(key, scancode, press, modifiers))
+                return true;
+
+            if (key == GLFW_KEY_M && press)
+            {
+                model_window_->setVisible(!model_window_->visible());
+                return true;
+            }
+
+            return false;
+        }
+
         virtual bool    scrollEvent(const ng::Vector2i &p, const ng::Vector2f &rel)
         {
             controls_.scrollEvent(p, rel);
