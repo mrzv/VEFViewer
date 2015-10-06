@@ -19,12 +19,12 @@ struct VertexModel: public Model
                                 const Points&           points,
                                 ng::Window*             window,
                                 float                   point_size  = 2.):
-                        Model(name, window, { 0,0,1,1}),
+                        Model(name, window, ng::Color(0.f,0.f,1.f,1.f)),
                         window_(window),
                         point_size_(point_size)
     {
         auto panel = new ng::Widget(window_);
-        panel->setLayout(new ng::BoxLayout(ng::BoxLayout::Horizontal, ng::BoxLayout::Middle, 0, 20));
+        panel->setLayout(new ng::BoxLayout(ng::Orientation::Horizontal, ng::Alignment::Middle, 0, 20));
 
         auto slider = new ng::Slider(panel);
         slider->setValue(point_size/max_point_size_);

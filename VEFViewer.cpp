@@ -68,7 +68,7 @@ class VEFViewer: public ng::Screen
             window->setLayout(new GroupLayout());
 
             Widget* tools = new Widget(window);
-            tools->setLayout(new BoxLayout(BoxLayout::Horizontal, BoxLayout::Middle, 0, 6));
+            tools->setLayout(new BoxLayout(Orientation::Horizontal, Alignment::Middle, 0, 6));
             Button* b = new Button(tools, "Open");
             b->setCallback([&,window]
                            {
@@ -90,7 +90,7 @@ class VEFViewer: public ng::Screen
 
             performLayout(mNVGContext);
             controls_.setSize(size());
-            setBackground({ .5, .5, .5 });
+            setBackground(background_);
         }
 
         void            add_model(std::unique_ptr<Model> m)         { models_.emplace_back(std::move(m)); }
@@ -209,6 +209,7 @@ class VEFViewer: public ng::Screen
         ng::Vector3f                            center_ = ng::Vector3f::Zero();
         ng::Vector3f                            range_;
         ng::Window*                             model_window_;
+        ng::Vector3f                            background_ = { .5, .5, .5 };
 };
 
 int main(int argc, char *argv[])

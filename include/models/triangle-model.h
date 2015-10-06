@@ -21,7 +21,7 @@ struct TriangleModel: public Model
                                   const Points&           points,
                                   const Triangles&        triangles,
                                   ng::Window*             window):
-                        Model(name, window, { 1., 1., 0., 1. }), window_(window)
+                        Model(name, window, ng::Color(1.f, 1.f, 0.f, 1.f)), window_(window)
     {
         ng::Vector3f min = points[0], max = points[0];
         for (auto& p : points)
@@ -36,7 +36,7 @@ struct TriangleModel: public Model
         }
 
         auto b = new ng::Button(tools_, "", ENTYPO_ICON_SHARE);
-        b->setButtonFlags(nanogui::Button::ToggleButton);
+        b->setFlags(nanogui::Button::ToggleButton);
         b->setPushed(wireframe_);
         b->setChangeCallback([this](bool state) { wireframe_ = state; });
         b->setTooltip("wireframe");

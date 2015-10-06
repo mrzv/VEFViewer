@@ -116,7 +116,7 @@ struct Controls: public ng::Arcball
             m.topLeftCorner<3,3>() = (Eigen::AngleAxisf(spin_angle_ * (glfwGetTime() - spin_time_), spin_axis_) * mQuat).normalized().toRotationMatrix();
             return m;
         }
-        return Arcball::matrix(ng::Matrix4f());
+        return Arcball::matrix();
     }
 
     ng::Vector2i            start_, last_;

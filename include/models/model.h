@@ -13,23 +13,23 @@ struct Model
 
                             Model(const std::string& name,
                                   nanogui::Window*   window,
-                                  const ng::Vector4f& color = { 0., 0., 0., 1. }):
+                                  const ng::Color&   color = ng::Color(0.f, 0.f, 0.f, 1.f)):
                                 color_(color)
     {
         new nanogui::Label(window, name);
 
         tools_ = new ng::Widget(window);
-        tools_->setLayout(new ng::BoxLayout(ng::BoxLayout::Horizontal, ng::BoxLayout::Middle, 0, 6));
+        tools_->setLayout(new ng::BoxLayout(ng::Orientation::Horizontal, ng::Alignment::Middle, 0, 6));
 
         auto b = new ng::Button(tools_, "", ENTYPO_ICON_EYE);
-        b->setButtonFlags(nanogui::Button::ToggleButton);
+        b->setFlags(nanogui::Button::ToggleButton);
         b->setPushed(visible_);
         b->setChangeCallback([this](bool state) { visible_ = state; });
 
         auto color_picker = new ng::PopupButton(window, "Color");
         auto popup = color_picker->popup();
-        auto color_wheel = new ng::ColorWheel(popup, color_.topLeftCorner<3,1>());
-        color_wheel->setCallback([this](const nanogui::Vector3f& color) { color_.topLeftCorner<3,1>() = color; });
+        auto color_wheel = new ng::ColorWheel(popup, color_);
+        color_wheel->setCallback([this](const nanogui::Color& color) { color_ = color; });
     }
 
     virtual void            draw(const ng::Matrix4f& mvp,
@@ -43,7 +43,7 @@ struct Model
     const ng::Vector4f&     color() const                               { return color_; }
 
     bool            visible_ = true;
-    ng::Vector4f    color_;
+    ng::Color       color_;
     ng::Widget*     tools_;
 };
 

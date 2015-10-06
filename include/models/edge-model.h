@@ -24,7 +24,7 @@ struct EdgeModel: public Model
                               const Edges&            edges,
                               ng::Window*             window,
                               float                   line_width  = 1.):
-                        Model(name, window, { 0., 1., 1., 1. }), window_(window), line_width_(line_width)
+                        Model(name, window, ng::Color(0.f, 1.f, 1.f, 1.f)), window_(window), line_width_(line_width)
     {
         //auto slider = new ng::Slider(window_);
         //slider->setValue(line_width_/max_line_width_);
