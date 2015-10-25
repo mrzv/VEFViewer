@@ -142,10 +142,10 @@ class VEFViewer: public ng::Screen
 
         virtual void    draw(NVGcontext *ctx)                                   { Screen::draw(ctx); }
 
-
-        virtual void    framebufferSizeChanged()
+        virtual bool    resizeEvent(const ng::Vector2i& s)
         {
-            controls_.setSize(size());
+            controls_.setSize(s);
+            return true;
         }
 
         virtual bool    mouseButtonEvent(const nanogui::Vector2i &p, int button, bool down, int modifiers)
