@@ -195,7 +195,7 @@ class VEFViewer: public ng::Screen
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             ng::Matrix4f projection = ng::Matrix4f::Identity();
-            projection.topLeftCorner<3,3>() /= range_.maxCoeff() / 1.9;
+            projection.topLeftCorner<3,3>() /= range_.norm() / 1.9;
             projection.row(0)               *= (float) mSize.y() / (float) mSize.x();
             projection                       = controls_.projection(projection);
 
