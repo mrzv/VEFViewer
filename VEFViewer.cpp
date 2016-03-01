@@ -88,8 +88,16 @@ class VEFViewer: public ng::Screen
             b = new Button(tools, "Recenter");
             b->setCallback([&] { recenter(true); });
 
+            background_window_ = new Window(this, "Background");
+            background_window_->setLayout(new GroupLayout());
+            background_window_->center();
+            auto color_wheel = new ng::ColorWheel(background_window_, background_);
+            color_wheel->setCallback([this](const nanogui::Color& color) { background_ = color.head<3>(); setBackground(background_); });
+            background_window_->setVisible(false);
+
             performLayout(mNVGContext);
             controls_.setSize(size());
+
             setBackground(background_);
         }
 
@@ -180,6 +188,12 @@ class VEFViewer: public ng::Screen
                 return true;
             }
 
+            if (key == GLFW_KEY_B && action == GLFW_PRESS)
+            {
+                background_window_->setVisible(!background_window_->visible());
+                return true;
+            }
+
             return false;
         }
 
@@ -215,6 +229,7 @@ class VEFViewer: public ng::Screen
         ng::Vector3f                            center_ = ng::Vector3f::Zero();
         ng::Vector3f                            range_;
         ng::Window*                             model_window_;
+        ng::Window*                             background_window_;
         ng::Vector3f                            background_ = { .5, .5, .5 };
 };
 
