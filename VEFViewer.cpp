@@ -148,15 +148,15 @@ class VEFViewer: public ng::Screen
             return bbox;
         }
 
-        virtual void    draw(NVGcontext *ctx)                                   { Screen::draw(ctx); if (saving_) savePPM(); }
+        virtual void    draw(NVGcontext *ctx) override                          { Screen::draw(ctx); if (saving_) savePPM(); }
 
-        virtual bool    resizeEvent(const ng::Vector2i& s)
+        virtual bool    resizeEvent(const ng::Vector2i& s) override
         {
             controls_.setSize(s);
             return true;
         }
 
-        virtual bool    mouseButtonEvent(const nanogui::Vector2i &p, int button, bool down, int modifiers)
+        virtual bool    mouseButtonEvent(const nanogui::Vector2i &p, int button, bool down, int modifiers) override
         {
             if (Screen::mouseButtonEvent(p,button,down,modifiers))
                 return true;
@@ -165,13 +165,13 @@ class VEFViewer: public ng::Screen
             return true;
         }
 
-        virtual bool    mouseMotionEvent(const nanogui::Vector2i &p, const nanogui::Vector2i &rel, int button, int modifiers)
+        virtual bool    mouseMotionEvent(const nanogui::Vector2i &p, const nanogui::Vector2i &rel, int button, int modifiers) override
         {
             controls_.mouseMotionEvent(p, rel, button, modifiers);
             return true;
         }
 
-        virtual bool keyboardEvent(int key, int scancode, int action, int modifiers)
+        virtual bool keyboardEvent(int key, int scancode, int action, int modifiers) override
         {
             if (Screen::keyboardEvent(key, scancode, action, modifiers))
                 return true;
@@ -218,13 +218,13 @@ class VEFViewer: public ng::Screen
             return false;
         }
 
-        virtual bool    scrollEvent(const ng::Vector2i &p, const ng::Vector2f &rel)
+        virtual bool    scrollEvent(const ng::Vector2i &p, const ng::Vector2f &rel) override
         {
             controls_.scrollEvent(p, rel);
             return true;
         }
 
-        virtual void    drawContents()
+        virtual void    drawContents() override
         {
             glEnable(GL_DEPTH_TEST);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
