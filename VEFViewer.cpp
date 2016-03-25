@@ -148,7 +148,7 @@ class VEFViewer: public ng::Screen
             return bbox;
         }
 
-        virtual void    draw(NVGcontext *ctx)                                   { Screen::draw(ctx); }
+        virtual void    draw(NVGcontext *ctx)                                   { Screen::draw(ctx); if (saving_) savePPM(); }
 
         virtual bool    resizeEvent(const ng::Vector2i& s)
         {
@@ -182,15 +182,36 @@ class VEFViewer: public ng::Screen
                 return true;
             }
 
-            if (key == GLFW_KEY_M && action == GLFW_PRESS)
+            if (key == GLFW_KEY_M && action == GLFW_PRESS && !saving_)
             {
                 model_window_->setVisible(!model_window_->visible());
                 return true;
             }
 
-            if (key == GLFW_KEY_B && action == GLFW_PRESS)
+            if (key == GLFW_KEY_B && action == GLFW_PRESS && !saving_)
             {
                 background_window_->setVisible(!background_window_->visible());
+                return true;
+            }
+
+            if (key == GLFW_KEY_S && action == GLFW_PRESS)
+            {
+                if (saving_)
+                {
+                    saving_ = false;
+                    model_window_->setVisible(model_visible_before_save_);
+                    background_window_->setVisible(background_visible_before_save_);
+                } else
+                {
+                    save_frame_ = 0;
+                    save_name_ = ng::file_dialog({{"", "Prefix for portable pixmap images"}}, true);
+                    saving_ = true;
+                    model_visible_before_save_ = model_window_->visible();
+                    background_visible_before_save_ = background_window_->visible();
+                    model_window_->setVisible(false);
+                    background_window_->setVisible(false);
+                }
+
                 return true;
             }
 
@@ -223,6 +244,18 @@ class VEFViewer: public ng::Screen
             for (auto& m : models_)
                 m->draw(mvp, model, view, projection);
         }
+
+        void            savePPM()
+        {
+            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+            std::vector<GLubyte> pixels(3 * mFBSize.x() * mFBSize.y());
+            glReadPixels(0, 0, mFBSize.x(), mFBSize.y(), GL_RGB, GL_UNSIGNED_BYTE, &pixels[0]);
+            auto outfn = fmt::format("{}-{:05}.ppm", save_name_, save_frame_++);
+            fmt::print("Saving screenshot to {}\n", outfn);
+            std::ofstream out(outfn, std::ios::binary);
+            out << "P6\n" << mFBSize.x() << ' ' << mFBSize.y() << "\n255\n";
+            out.write((char*) &pixels[0], pixels.size());
+        }
     private:
         std::list<std::unique_ptr<Model>>       models_;
         Controls                                controls_;
@@ -231,6 +264,14 @@ class VEFViewer: public ng::Screen
         ng::Window*                             model_window_;
         ng::Window*                             background_window_;
         ng::Vector3f                            background_ = { .5, .5, .5 };
+
+        // screenshot support
+        bool        saving_ = false;
+        size_t      save_frame_;
+        std::string save_name_;
+        bool        model_visible_before_save_,
+                    background_visible_before_save_;
+
 };
 
 int main(int argc, char *argv[])
