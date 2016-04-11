@@ -45,6 +45,7 @@ endfunction             (bin2c)
 set                     (shader_sources
                          vertex.vrt     vertex.frg
                          edge.vrt       edge.frg
+                         sphere.vrt
                          triangle.vrt   triangle.frg)
 
 foreach                 (shader_source ${shader_sources})

@@ -27,6 +27,7 @@
 #include <models/vertex-model.h>
 #include <models/edge-model.h>
 #include <models/triangle-model.h>
+#include <models/sphere-model.h>
 
 namespace   ng = nanogui;
 
@@ -49,6 +50,8 @@ load_model_by_filetype(const std::string& fn, ng::Window* window)
         return load_triangle_model(fn, window);
     else if (ends_with(fn, ".obj"))
         return load_object_model(fn, window);
+    else if (ends_with(fn, ".sph"))
+        return load_sphere_model(fn, window);
 
     return 0;
 }
@@ -282,12 +285,14 @@ int main(int argc, char *argv[])
     std::vector<std::string>    vertex_filenames,
                                 triangle_filenames,
                                 edge_filenames,
-                                object_filenames;
+                                object_filenames,
+                                sphere_filenames;
     ops
         >> Option('v', "vertex",    vertex_filenames,   "vertex file")
         >> Option('t', "triangle",  triangle_filenames, "triangle file")
         >> Option('e', "edge",      edge_filenames,     "edge file")
         >> Option('o', "object",    object_filenames,   "object file")
+        >> Option('s', "sphere",    sphere_filenames,   "sphere file")
     ;
 
     if (ops >> Present('h', "help", "show help"))
@@ -315,6 +320,8 @@ int main(int argc, char *argv[])
             app->add_model(load_edge_model(fn, app->model_window()));
         for (auto& fn : object_filenames)
             app->add_model(load_object_model(fn, app->model_window()));
+        for (auto& fn : sphere_filenames)
+            app->add_model(load_sphere_model(fn, app->model_window()));
 
         std::string fn;
         while (ops >> PosOption(fn))

@@ -1,0 +1,13 @@
+#version 330
+uniform mat4 modelViewProj;
+uniform vec4 sphere;
+in vec3 position;
+in vec3 normal;
+smooth out vec3 n;
+smooth out vec4 position_;
+void main()
+{
+    gl_Position = modelViewProj * vec4(position*sphere[3] + vec3(sphere), 1.0);
+    position_   = gl_Position;
+    n = normalize(normal);
+}
