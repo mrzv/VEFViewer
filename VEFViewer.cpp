@@ -53,6 +53,7 @@ load_model_by_filetype(const std::string& fn, ng::Window* window)
     else if (ends_with(fn, ".sph"))
         return load_sphere_model(fn, window);
 
+    fmt::print(std::cerr, "Unknown file type: {}\n", fn);
     return 0;
 }
 
@@ -104,7 +105,7 @@ class VEFViewer: public ng::Screen
             setBackground(background_);
         }
 
-        void            add_model(std::unique_ptr<Model> m)         { models_.emplace_back(std::move(m)); }
+        void            add_model(std::unique_ptr<Model> m)         { if (m) models_.emplace_back(std::move(m)); }
         void            perform_layout()                            { performLayout(mNVGContext); }
         ng::Window*     model_window() const                        { return model_window_; }
         void            recenter(bool visible_only = false)
