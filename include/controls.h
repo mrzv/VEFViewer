@@ -22,7 +22,7 @@ struct Controls: public ng::Arcball
                 {
                     double speed = (p - start_).norm();
                            speed /= dt;
-                    if (speed > 500)
+                    if (speed > 500 || modifiers == GLFW_MOD_CONTROL)
                     {
                         spin_axis_ = Arcball::mIncr.vec().normalized();
                         spin_angle_ = 2*std::acos(Arcball::mIncr.w());
