@@ -122,7 +122,7 @@ struct Controls: public ng::Arcball
     ng::Vector2i            start_, last_;
     ng::Matrix4f            mat_;
     mutable ng::Matrix4f    res_;
-    bool                    active_;
+    bool                    active_ = false;
     float                   scale_ = 0.;
     float                   scale_factor_ = .1;
     float                   spin_angle_;
