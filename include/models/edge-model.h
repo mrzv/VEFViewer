@@ -2,6 +2,7 @@
 #define VEFVIEWER_EDGE_MODEL_H
 
 #include "model.h"
+#include <zstr/zstr.hpp>
 #include <format.h>
 
 extern unsigned char edge_vrt[];
@@ -109,7 +110,7 @@ load_edge_model(const std::string& fn, ng::Window* window)
     Points          points;
     Edges           edges;
 
-    std::ifstream   in(fn.c_str());
+    zstr::ifstream  in(fn.c_str());
     std::string     line;
 
     size_t i = 0;

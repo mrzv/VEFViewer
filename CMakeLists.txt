@@ -34,6 +34,10 @@ elseif                  ("${CMAKE_SYSTEM}" MATCHES "Linux")
   include_directories   (${GLFW3_INCLUDE_DIR})
 endif                   ()
 
+# ZLib
+find_package            (ZLIB REQUIRED)
+include_directories     (${ZLIB_INCLUDE_DIRS})
+
 # Shaders
 function                (bin2c shader_name)
     add_custom_command  (OUTPUT             ${CMAKE_BINARY_DIR}/${shader_name}.c
@@ -54,4 +58,4 @@ foreach                 (shader_source ${shader_sources})
 endforeach              ()
 
 add_executable          (VEFViewer      VEFViewer.cpp format.cc ${shaders})
-target_link_libraries   (VEFViewer      ${NANOGUI_LIBRARY} ${GLFW3_LIBRARY} ${extra_libs})
+target_link_libraries   (VEFViewer      ${NANOGUI_LIBRARY} ${GLFW3_LIBRARY} ${extra_libs} ${ZLIB_LIBRARIES})

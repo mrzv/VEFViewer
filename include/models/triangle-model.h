@@ -2,6 +2,7 @@
 #define VEFVIEWER_TRIANGLE_MODEL_H
 
 #include "model.h"
+#include <zstr/zstr.hpp>
 #include <format.h>
 
 extern unsigned char triangle_vrt[];
@@ -162,7 +163,7 @@ load_object_model(const std::string& fn, ng::Window* window)
     Points          points;
     Triangles       triangles;
 
-    std::ifstream   in(fn.c_str());
+    zstr::ifstream  in(fn.c_str());
     std::string     line;
 
     while (std::getline(in, line))

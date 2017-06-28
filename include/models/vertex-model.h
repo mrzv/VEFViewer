@@ -2,6 +2,7 @@
 #define VEFVIEWER_VERTEX_MODEL_H
 
 #include "model.h"
+#include <zstr/zstr.hpp>
 #include <format.h>
 
 extern unsigned char vertex_vrt[];
@@ -107,7 +108,7 @@ load_vertex_model(const std::string& fn, ng::Window* window)
     typedef     VertexModel::Points     Points;
 
     Points          points;
-    std::ifstream   in(fn.c_str());
+    zstr::ifstream  in(fn.c_str());
     std::string line;
 
     while (std::getline(in, line))

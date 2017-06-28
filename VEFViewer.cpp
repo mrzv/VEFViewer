@@ -42,15 +42,15 @@ bool ends_with(const std::string& s, const std::string& ending)
 std::unique_ptr<Model>
 load_model_by_filetype(const std::string& fn, ng::Window* window)
 {
-    if (ends_with(fn, ".vrt"))
+    if (ends_with(fn, ".vrt") || ends_with(fn, ".vrt.gz"))
         return load_vertex_model(fn, window);
-    else if (ends_with(fn, ".edg"))
+    else if (ends_with(fn, ".edg") || ends_with(fn, ".edg.gz"))
         return load_edge_model(fn, window);
-    else if (ends_with(fn, ".tri"))
+    else if (ends_with(fn, ".tri") || ends_with(fn, ".tri.gz"))
         return load_triangle_model(fn, window);
-    else if (ends_with(fn, ".obj"))
+    else if (ends_with(fn, ".obj") || ends_with(fn, ".obj.gz"))
         return load_object_model(fn, window);
-    else if (ends_with(fn, ".sph"))
+    else if (ends_with(fn, ".sph") || ends_with(fn, ".sph.gz"))
         return load_sphere_model(fn, window);
 
     fmt::print(std::cerr, "Unknown file type: {}\n", fn);

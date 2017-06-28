@@ -2,6 +2,7 @@
 #define VEFVIEWER_SPHERE_MODEL_H
 
 #include "model.h"
+#include <zstr/zstr.hpp>
 #include <format.h>
 
 extern unsigned char sphere_vrt[];
@@ -137,7 +138,7 @@ load_sphere_model(const std::string& fn, ng::Window* window)
 {
     typedef         std::vector<ng::Vector4f>   Spheres;
     Spheres         spheres;
-    std::ifstream   in(fn.c_str());
+    zstr::ifstream  in(fn.c_str());
     std::string line;
 
     while (std::getline(in, line))
