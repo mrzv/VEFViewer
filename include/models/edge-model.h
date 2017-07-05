@@ -3,7 +3,6 @@
 
 #include "model.h"
 #include <zstr/zstr.hpp>
-#include <format.h>
 
 extern unsigned char edge_vrt[];
 extern unsigned int  edge_vrt_len;

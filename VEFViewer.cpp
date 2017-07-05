@@ -20,7 +20,8 @@
 #include <memory>
 
 #include <opts/opts.h>
-#include <format.h>
+#include <fmt/format.h>
+#include <fmt/ostream.h>
 
 #include <controls.h>
 

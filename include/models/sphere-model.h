@@ -3,7 +3,6 @@
 
 #include "model.h"
 #include <zstr/zstr.hpp>
-#include <format.h>
 
 extern unsigned char sphere_vrt[];
 extern unsigned int  sphere_vrt_len;

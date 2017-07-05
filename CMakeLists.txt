@@ -1,15 +1,12 @@
 cmake_minimum_required  (VERSION 3.0.2)
 project                 (VEFViewer)
 
-find_path               (NANOGUI_INCLUDE_DIR    nanogui/nanogui.h)
+find_path               (NANOGUI_DIR            include/nanogui/nanogui.h)
 find_library            (NANOGUI_LIBRARY        nanogui)
-find_path               (EIGEN_INCLUDE_DIR      eigen3/Eigen/Core)
-find_path               (NANOVG_INCLUDE_DIR     nanovg.h)
 include_directories     (${CMAKE_SOURCE_DIR}/include
-                         ${NANOGUI_INCLUDE_DIR}
-                         SYSTEM ${EIGEN_INCLUDE_DIR}/eigen3
-                         ${NANOVG_INCLUDE_DIR})
-
+                         ${NANOGUI_DIR}/include
+                         SYSTEM ${NANOGUI_DIR}/ext/eigen
+                         ${NANOGUI_DIR}/ext/nanovg/src)
 
 set                     (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 if                      (APPLE)
@@ -21,17 +18,9 @@ if                      (APPLE)
   find_library          (iokit_library IOKit)
   set                   (extra_libs ${cocoa_library} ${opengl_library} ${corevideo_library} ${iokit_library})
   set                   (extra_source src/darwin.mm)
-
-  find_path             (GLFW3_INCLUDE_DIR      GLFW/glfw3.h)
-  find_library          (GLFW3_LIBRARY          glfw3)
-  include_directories   (${GLFW3_INCLUDE_DIR})
 elseif                  ("${CMAKE_SYSTEM}" MATCHES "Linux")
   set                   (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
   set                   (extra_libs GL Xxf86vm Xrandr Xinerama Xcursor Xi X11 pthread dl)
-
-  find_path             (GLFW3_INCLUDE_DIR      GLFW/glfw3.h)
-  find_library          (GLFW3_LIBRARY          glfw)
-  include_directories   (${GLFW3_INCLUDE_DIR})
 endif                   ()
 
 # ZLib
@@ -57,5 +46,6 @@ foreach                 (shader_source ${shader_sources})
     set                 (shaders ${shaders} ${shader_source}.c)
 endforeach              ()
 
-add_executable          (VEFViewer      VEFViewer.cpp format.cc ${shaders})
-target_link_libraries   (VEFViewer      ${NANOGUI_LIBRARY} ${GLFW3_LIBRARY} ${extra_libs} ${ZLIB_LIBRARIES})
+add_library             (format         src/format.cc src/ostream.cc)
+add_executable          (VEFViewer      VEFViewer.cpp  ${shaders})
+target_link_libraries   (VEFViewer      format ${NANOGUI_LIBRARY} ${extra_libs} ${ZLIB_LIBRARIES})
