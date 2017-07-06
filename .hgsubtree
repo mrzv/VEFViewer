@@ -14,3 +14,16 @@ destination:
     mv glob:src/** include/zstr
     mkdir licenses
     mv LICENSE licenses/LICENSE.zstr
+
+[fmt]
+source = gh://fmtlib/fmt
+rev = release
+collapse = True
+destination:
+    mkdir include/fmt
+    mv fmt/format.h include/fmt
+    mv fmt/ostream.h include/fmt
+    mkdir src
+    mv fmt/format.cc src
+    mv fmt/ostream.cc src
+    mv LICENSE.rst licenses/LICENSE.fmt
