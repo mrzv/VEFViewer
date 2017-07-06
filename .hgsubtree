@@ -1,0 +1,7 @@
+[HighFive]
+source = gh://BlueBrain/HighFive
+collapse = True
+destination:
+    keep include/**
+    mkdir licenses
+    mv LICENSE licenses/LICENSE.HighFive
