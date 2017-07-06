@@ -27,3 +27,8 @@ destination:
     mv fmt/format.cc src
     mv fmt/ostream.cc src
     mv LICENSE.rst licenses/LICENSE.fmt
+
+[opts]
+source = ~/Research/Libraries/opts
+destination:
+    keep include/**
