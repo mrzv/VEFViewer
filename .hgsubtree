@@ -5,3 +5,12 @@ destination:
     keep include/**
     mkdir licenses
     mv LICENSE licenses/LICENSE.HighFive
+
+[zstr]
+source = gh://mateidavid/zstr
+collapse = True
+destination:
+    mkdir include/zstr
+    mv glob:src/** include/zstr
+    mkdir licenses
+    mv LICENSE licenses/LICENSE.zstr
