@@ -45,6 +45,8 @@ load_model_by_filetype(const std::string& fn, ng::Window* window)
 {
     if (ends_with(fn, ".vrt") || ends_with(fn, ".vrt.gz"))
         return load_vertex_model(fn, window);
+    else if (ends_with(fn, ".h5"))
+        return load_vertex_hdf5_model(fn, window);
     else if (ends_with(fn, ".edg") || ends_with(fn, ".edg.gz"))
         return load_edge_model(fn, window);
     else if (ends_with(fn, ".tri") || ends_with(fn, ".tri.gz"))

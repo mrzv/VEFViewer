@@ -4,6 +4,7 @@
 #include "model.h"
 #include <zstr/zstr.hpp>
 #include <fmt/format.h>
+#include <highfive/H5File.hpp>
 
 extern unsigned char vertex_vrt[];
 extern unsigned int  vertex_vrt_len;
@@ -123,5 +124,30 @@ load_vertex_model(const std::string& fn, ng::Window* window)
     return std::unique_ptr<Model>(new VertexModel(fn, points, window));
 }
 
+std::unique_ptr<Model>
+load_vertex_hdf5_model(const std::string& fn, ng::Window* window)
+{
+    typedef     VertexModel::Points     Points;
+
+    HighFive::File in(fn);
+
+    HighFive::DataSet x = in.getDataSet("x");
+    HighFive::DataSet y = in.getDataSet("y");
+    HighFive::DataSet z = in.getDataSet("z");
+
+    std::vector<float> xs, ys, zs;
+    x.read(xs);
+    y.read(ys);
+    z.read(zs);
+
+    if (xs.size() != ys.size() || xs.size() != zs.size())
+        throw std::runtime_error(fmt::format("Dataset sizes don't match: {} {} {}\n", xs.size(), ys.size(), zs.size()));
+
+    Points points;
+    for (size_t i = 0; i < xs.size(); ++i)
+        points.push_back({xs[i], ys[i], zs[i]});
+
+    return std::unique_ptr<Model>(new VertexModel(fn, points, window));
+}
 
 #endif

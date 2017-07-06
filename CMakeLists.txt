@@ -27,6 +27,10 @@ endif                   ()
 find_package            (ZLIB REQUIRED)
 include_directories     (${ZLIB_INCLUDE_DIRS})
 
+# HDF5
+find_package            (HDF5 REQUIRED)
+include_directories     (${HDF5_INCLUDE_DIRS})
+
 # Shaders
 function                (bin2c shader_name)
     add_custom_command  (OUTPUT             ${CMAKE_BINARY_DIR}/${shader_name}.c
@@ -48,4 +52,4 @@ endforeach              ()
 
 add_library             (format         src/format.cc src/ostream.cc)
 add_executable          (VEFViewer      VEFViewer.cpp  ${shaders})
-target_link_libraries   (VEFViewer      format ${NANOGUI_LIBRARY} ${extra_libs} ${ZLIB_LIBRARIES})
+target_link_libraries   (VEFViewer      format ${NANOGUI_LIBRARY} ${extra_libs} ${ZLIB_LIBRARIES} ${HDF5_C_LIBRARIES})
