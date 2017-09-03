@@ -129,7 +129,7 @@ load_triangle_model(const std::string& fn, ng::Window* window)
     Points          points;
     Triangles       triangles;
 
-    std::ifstream   in(fn.c_str());
+    zstr::ifstream  in(fn.c_str());
     std::string     line;
 
     size_t i = 0;
