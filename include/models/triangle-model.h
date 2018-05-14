@@ -2,6 +2,7 @@
 #define VEFVIEWER_TRIANGLE_MODEL_H
 
 #include "model.h"
+#include "../parse_stl.h"
 #include <zstr/zstr.hpp>
 
 extern unsigned char triangle_vrt[];
@@ -189,4 +190,30 @@ load_object_model(const std::string& fn, ng::Window* window)
     return std::unique_ptr<Model>(new TriangleModel(fn, points, triangles, window));
 }
 
+std::unique_ptr<Model>
+load_stl_model(const std::string& fn, ng::Window* window)
+{
+    typedef     TriangleModel::Points      Points;
+    typedef     TriangleModel::Triangles   Triangles;
+    typedef     TriangleModel::Triangle    Triangle;
+
+    Points          points;
+    Triangles       triangles;
+
+    zstr::ifstream  in(fn.c_str());
+
+    auto data = stl::parse_stl(in);
+
+    for (auto& t : data.triangles)
+    {
+        points.emplace_back(t.v1.x,t.v1.y,t.v1.z);
+        points.emplace_back(t.v2.x,t.v2.y,t.v2.z);
+        points.emplace_back(t.v3.x,t.v3.y,t.v3.z);
+
+        size_t n = points.size();
+        triangles.emplace_back(n-3, n-2, n-1);
+    }
+
+    return std::unique_ptr<Model>(new TriangleModel(fn, points, triangles, window));
+}
 #endif

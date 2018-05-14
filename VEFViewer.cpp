@@ -53,6 +53,8 @@ load_model_by_filetype(const std::string& fn, ng::Window* window)
         return load_triangle_model(fn, window);
     else if (ends_with(fn, ".obj") || ends_with(fn, ".obj.gz"))
         return load_object_model(fn, window);
+    else if (ends_with(fn, ".stl") || ends_with(fn, ".stl.gz"))
+        return load_stl_model(fn, window);
     else if (ends_with(fn, ".sph") || ends_with(fn, ".sph.gz"))
         return load_sphere_model(fn, window);
 

@@ -51,5 +51,5 @@ foreach                 (shader_source ${shader_sources})
 endforeach              ()
 
 add_library             (format         src/format.cc src/ostream.cc)
-add_executable          (VEFViewer      VEFViewer.cpp  ${shaders})
+add_executable          (VEFViewer      VEFViewer.cpp  ${shaders} src/parse_stl.cpp)
 target_link_libraries   (VEFViewer      format ${NANOGUI_LIBRARY} ${extra_libs} ${ZLIB_LIBRARIES} ${HDF5_C_LIBRARIES})
