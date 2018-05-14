@@ -286,7 +286,7 @@ class VEFViewer: public ng::Screen
 int main(int argc, char *argv[])
 {
     using namespace opts;
-    Options ops(argc, argv);
+    Options ops;
 
     std::vector<std::string>    vertex_filenames,
                                 triangle_filenames,
@@ -300,8 +300,10 @@ int main(int argc, char *argv[])
         >> Option('o', "object",    object_filenames,   "object file")
         >> Option('s', "sphere",    sphere_filenames,   "sphere file")
     ;
+    bool help;
+    ops >> Option('h', "help",      help,               "show help");
 
-    if (ops >> Present('h', "help", "show help"))
+    if (!ops.parse(argc, argv) || help)
     {
         fmt::print("Usage: {} [OPTIONS] FILENAMES\n{}", argv[0], ops);
         return 1;
