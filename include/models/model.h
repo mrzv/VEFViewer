@@ -32,6 +32,8 @@ struct Model
         color_wheel->setCallback([this](const nanogui::Color& color) { color_ = color; });
     }
 
+    virtual                 ~Model()                                    {}
+
     virtual void            draw(const ng::Matrix4f& mvp,
                                  const ng::Matrix4f& model,
                                  const ng::Matrix4f& view,
