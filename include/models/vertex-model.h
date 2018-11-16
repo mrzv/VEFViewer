@@ -133,12 +133,17 @@ load_vertex_hdf5_model(const std::string& fn, ng::Window* window)
 
     HighFive::DataSet x = in.getDataSet("x");
     HighFive::DataSet y = in.getDataSet("y");
-    HighFive::DataSet z = in.getDataSet("z");
 
     std::vector<float> xs, ys, zs;
     x.read(xs);
     y.read(ys);
-    z.read(zs);
+
+    if (in.exist("z"))
+    {
+        HighFive::DataSet z = in.getDataSet("z");
+        z.read(zs);
+    } else
+        zs.resize(xs.size());
 
     if (xs.size() != ys.size() || xs.size() != zs.size())
         throw std::runtime_error(fmt::format("Dataset sizes don't match: {} {} {}\n", xs.size(), ys.size(), zs.size()));
