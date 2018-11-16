@@ -216,4 +216,46 @@ load_stl_model(const std::string& fn, ng::Window* window)
 
     return std::unique_ptr<Model>(new TriangleModel(fn, points, triangles, window));
 }
+
+std::unique_ptr<Model>
+load_triangle_hdf5_model(const std::string& fn, ng::Window* window)
+{
+    typedef     TriangleModel::Points      Points;
+    typedef     TriangleModel::Triangles   Triangles;
+    typedef     TriangleModel::Triangle    Triangle;
+
+    Points          points;
+    Triangles       triangles;
+
+    HighFive::File in(fn);
+
+    HighFive::DataSet x = in.getDataSet("x");
+    HighFive::DataSet y = in.getDataSet("y");
+
+    std::vector<float> xs, ys, zs;
+    x.read(xs);
+    y.read(ys);
+
+    if (in.exist("z"))
+    {
+        HighFive::DataSet z = in.getDataSet("z");
+        z.read(zs);
+    } else
+        zs.resize(xs.size());
+
+    if (xs.size() != ys.size() || xs.size() != zs.size())
+        throw std::runtime_error(fmt::format("Dataset sizes don't match: {} {} {}\n", xs.size(), ys.size(), zs.size()));
+
+    for (size_t i = 0; i < xs.size(); ++i)
+        points.emplace_back(xs[i], ys[i], zs[i]);
+
+    HighFive::DataSet tri = in.getDataSet("triangles");
+    std::vector<size_t> tris;
+    tri.read(tris);
+
+    for (size_t i = 0; i < tris.size(); i += 3)
+        triangles.emplace_back(tris[i], tris[i+1], tris[i+2]);
+
+    return std::unique_ptr<Model>(new TriangleModel(fn, points, triangles, window));
+}
 #endif
