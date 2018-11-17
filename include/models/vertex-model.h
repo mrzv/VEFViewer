@@ -75,7 +75,6 @@ struct VertexModel: public Model
         textBox->setValue(fmt::format("{:.2f}", point_size_));
 
         slider->setCallback([this,textBox](float ps) { point_size_ = max_point_size_*ps; textBox->setValue(fmt::format("{:.2f}", point_size_)); });
-
     }
 
     virtual void            draw(const ng::Matrix4f& mvp,

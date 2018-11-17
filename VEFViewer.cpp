@@ -29,6 +29,7 @@
 #include <models/edge-model.h>
 #include <models/triangle-model.h>
 #include <models/sphere-model.h>
+#include <models/stack.h>
 
 namespace   ng = nanogui;
 
@@ -297,12 +298,15 @@ int main(int argc, char *argv[])
                                 edge_filenames,
                                 object_filenames,
                                 sphere_filenames;
+    bool stack;
+
     ops
         >> Option('v', "vertex",    vertex_filenames,   "vertex file")
         >> Option('t', "triangle",  triangle_filenames, "triangle file")
         >> Option('e', "edge",      edge_filenames,     "edge file")
         >> Option('o', "object",    object_filenames,   "object file")
         >> Option('s', "sphere",    sphere_filenames,   "sphere file")
+        >> Option(     "stack",     stack,              "stack models")
     ;
     bool help;
     ops >> Option('h', "help",      help,               "show help");
@@ -341,10 +345,18 @@ int main(int argc, char *argv[])
         while (ops >> PosOption(fn))
             models.emplace_back(load_model_by_filetype(fn));
 
-        for (auto&& m : models)
+        if (!stack)
         {
-            m->init_window(app->model_window());
-            app->add_model(std::move(m));
+            for (auto&& m : models)
+            {
+                m->init_window(app->model_window());
+                app->add_model(std::move(m));
+            }
+        } else
+        {
+            std::unique_ptr<Stack> s { new Stack(models) };
+            s->init_window(app->model_window());
+            app->add_model(std::move(s));
         }
 
         app->recenter();

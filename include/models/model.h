@@ -33,8 +33,8 @@ struct Model
 
         auto color_picker = new ng::PopupButton(window, "Color");
         auto popup = color_picker->popup();
-        auto color_wheel = new ng::ColorWheel(popup, color_);
-        color_wheel->setCallback([this](const nanogui::Color& color) { color_ = color; });
+        color_wheel_ = new ng::ColorWheel(popup, color_);
+        color_wheel_->setCallback([this](const nanogui::Color& color) { color_ = color; });
     }
 
     virtual void            draw(const ng::Matrix4f& mvp,
@@ -51,6 +51,7 @@ struct Model
     std::string     name_;
     ng::Color       color_;
     ng::Widget*     tools_;
+    ng::ColorWheel* color_wheel_;
 };
 
 #endif
