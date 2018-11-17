@@ -20,9 +20,8 @@ struct TriangleModel: public Model
 
                     TriangleModel(const std::string&      name,
                                   const Points&           points,
-                                  const Triangles&        triangles,
-                                  ng::Window*             window):
-                        Model(name, window, ng::Color(1.f, 1.f, 0.f, 1.f)), window_(window)
+                                  const Triangles&        triangles):
+                        Model(name, ng::Color(1.f, 1.f, 0.f, 1.f))
     {
         ng::Vector3f min = points[0], max = points[0];
         for (auto& p : points)
@@ -116,12 +115,11 @@ struct TriangleModel: public Model
         BBox                    bbox_;
         size_t                  n_;
         mutable ng::GLShader    shader_;
-        ng::Window*             window_;
         bool                    wireframe_ = false;
 };
 
 std::unique_ptr<Model>
-load_triangle_model(const std::string& fn, ng::Window* window)
+load_triangle_model(const std::string& fn)
 {
     typedef     TriangleModel::Points      Points;
     typedef     TriangleModel::Triangles   Triangles;
@@ -150,11 +148,11 @@ load_triangle_model(const std::string& fn, ng::Window* window)
         ++i;
     }
 
-    return std::unique_ptr<Model>(new TriangleModel(fn, points, triangles, window));
+    return std::unique_ptr<Model>(new TriangleModel(fn, points, triangles));
 }
 
 std::unique_ptr<Model>
-load_object_model(const std::string& fn, ng::Window* window)
+load_object_model(const std::string& fn)
 {
     typedef     TriangleModel::Points      Points;
     typedef     TriangleModel::Triangles   Triangles;
@@ -187,11 +185,11 @@ load_object_model(const std::string& fn, ng::Window* window)
         }
     }
 
-    return std::unique_ptr<Model>(new TriangleModel(fn, points, triangles, window));
+    return std::unique_ptr<Model>(new TriangleModel(fn, points, triangles));
 }
 
 std::unique_ptr<Model>
-load_stl_model(const std::string& fn, ng::Window* window)
+load_stl_model(const std::string& fn)
 {
     typedef     TriangleModel::Points      Points;
     typedef     TriangleModel::Triangles   Triangles;
@@ -214,11 +212,11 @@ load_stl_model(const std::string& fn, ng::Window* window)
         triangles.emplace_back(n-3, n-2, n-1);
     }
 
-    return std::unique_ptr<Model>(new TriangleModel(fn, points, triangles, window));
+    return std::unique_ptr<Model>(new TriangleModel(fn, points, triangles));
 }
 
 std::unique_ptr<Model>
-load_triangle_hdf5_model(const std::string& fn, ng::Window* window)
+load_triangle_hdf5_model(const std::string& fn)
 {
     typedef     TriangleModel::Points      Points;
     typedef     TriangleModel::Triangles   Triangles;
@@ -256,6 +254,6 @@ load_triangle_hdf5_model(const std::string& fn, ng::Window* window)
     for (size_t i = 0; i < tris.size(); i += 3)
         triangles.emplace_back(tris[i], tris[i+1], tris[i+2]);
 
-    return std::unique_ptr<Model>(new TriangleModel(fn, points, triangles, window));
+    return std::unique_ptr<Model>(new TriangleModel(fn, points, triangles));
 }
 #endif

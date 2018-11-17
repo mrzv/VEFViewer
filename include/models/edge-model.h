@@ -22,9 +22,8 @@ struct EdgeModel: public Model
                     EdgeModel(const std::string&      name,
                               const Points&           points,
                               const Edges&            edges,
-                              ng::Window*             window,
                               float                   line_width  = 1.):
-                        Model(name, window, ng::Color(0.f, 1.f, 1.f, 1.f)), window_(window), line_width_(line_width)
+                        Model(name, ng::Color(0.f, 1.f, 1.f, 1.f)), line_width_(line_width)
     {
         //auto slider = new ng::Slider(window_);
         //slider->setValue(line_width_/max_line_width_);
@@ -96,11 +95,10 @@ struct EdgeModel: public Model
         mutable ng::GLShader    shader_;
         float                   line_width_;
         static constexpr float  max_line_width_ = 5.;
-        ng::Window*             window_;
 };
 
 std::unique_ptr<Model>
-load_edge_model(const std::string& fn, ng::Window* window)
+load_edge_model(const std::string& fn)
 {
     typedef     EdgeModel::Points      Points;
     typedef     EdgeModel::Edges       Edges;
@@ -127,7 +125,7 @@ load_edge_model(const std::string& fn, ng::Window* window)
         ++i;
     }
 
-    return std::unique_ptr<Model>(new EdgeModel(fn, points, edges, window));
+    return std::unique_ptr<Model>(new EdgeModel(fn, points, edges));
 }
 
 

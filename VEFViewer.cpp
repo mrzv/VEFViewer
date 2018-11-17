@@ -41,24 +41,24 @@ bool ends_with(const std::string& s, const std::string& ending)
 }
 
 std::unique_ptr<Model>
-load_model_by_filetype(const std::string& fn, ng::Window* window)
+load_model_by_filetype(const std::string& fn)
 {
     if (ends_with(fn, ".vrt") || ends_with(fn, ".vrt.gz"))
-        return load_vertex_model(fn, window);
+        return load_vertex_model(fn);
     else if (ends_with(fn, ".tri.h5"))
-        return load_triangle_hdf5_model(fn, window);
+        return load_triangle_hdf5_model(fn);
     else if (ends_with(fn, ".h5"))
-        return load_vertex_hdf5_model(fn, window);
+        return load_vertex_hdf5_model(fn);
     else if (ends_with(fn, ".edg") || ends_with(fn, ".edg.gz"))
-        return load_edge_model(fn, window);
+        return load_edge_model(fn);
     else if (ends_with(fn, ".tri") || ends_with(fn, ".tri.gz"))
-        return load_triangle_model(fn, window);
+        return load_triangle_model(fn);
     else if (ends_with(fn, ".obj") || ends_with(fn, ".obj.gz"))
-        return load_object_model(fn, window);
+        return load_object_model(fn);
     else if (ends_with(fn, ".stl") || ends_with(fn, ".stl.gz"))
-        return load_stl_model(fn, window);
+        return load_stl_model(fn);
     else if (ends_with(fn, ".sph") || ends_with(fn, ".sph.gz"))
-        return load_sphere_model(fn, window);
+        return load_sphere_model(fn);
 
     fmt::print(std::cerr, "Unknown file type: {}\n", fn);
     return 0;
@@ -92,7 +92,9 @@ class VEFViewer: public ng::Screen
                                                      false);
                                if (fn.empty())
                                    return;
-                               add_model(load_model_by_filetype(fn, window));
+                               auto&& m = load_model_by_filetype(fn);
+                               m->init_window(window);
+                               add_model(std::move(m));
                                recenter();
                                perform_layout();
                            });
@@ -322,20 +324,28 @@ int main(int argc, char *argv[])
         //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 
+        std::vector<std::unique_ptr<Model>> models;
+
         for (auto& fn : vertex_filenames)
-            app->add_model(load_vertex_model(fn, app->model_window()));
+            models.emplace_back(load_vertex_model(fn));
         for (auto& fn : triangle_filenames)
-            app->add_model(load_triangle_model(fn, app->model_window()));
+            models.emplace_back(load_triangle_model(fn));
         for (auto& fn : edge_filenames)
-            app->add_model(load_edge_model(fn, app->model_window()));
+            models.emplace_back(load_edge_model(fn));
         for (auto& fn : object_filenames)
-            app->add_model(load_object_model(fn, app->model_window()));
+            models.emplace_back(load_object_model(fn));
         for (auto& fn : sphere_filenames)
-            app->add_model(load_sphere_model(fn, app->model_window()));
+            models.emplace_back(load_sphere_model(fn));
 
         std::string fn;
         while (ops >> PosOption(fn))
-            app->add_model(load_model_by_filetype(fn, app->model_window()));
+            models.emplace_back(load_model_by_filetype(fn));
+
+        for (auto&& m : models)
+        {
+            m->init_window(app->model_window());
+            app->add_model(std::move(m));
+        }
 
         app->recenter();
         app->perform_layout();

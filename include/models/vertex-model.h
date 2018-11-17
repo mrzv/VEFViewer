@@ -19,25 +19,10 @@ struct VertexModel: public Model
 
                     VertexModel(const std::string&      name,
                                 const Points&           points,
-                                ng::Window*             window,
                                 float                   point_size  = 2.):
-                        Model(name, window, ng::Color(0.f,0.f,1.f,1.f)),
-                        window_(window),
+                        Model(name, ng::Color(0.f,0.f,1.f,1.f)),
                         point_size_(point_size)
     {
-        auto panel = new ng::Widget(window_);
-        panel->setLayout(new ng::BoxLayout(ng::Orientation::Horizontal, ng::Alignment::Middle, 0, 20));
-
-        auto slider = new ng::Slider(panel);
-        slider->setValue(point_size/max_point_size_);
-        slider->setTooltip("point size");
-
-        auto textBox = new ng::TextBox(panel);
-        textBox->setFixedSize(ng::Vector2i(60, 25));
-        textBox->setValue(fmt::format("{:.2f}", point_size_));
-
-        slider->setCallback([this,textBox](float ps) { point_size_ = max_point_size_*ps; textBox->setValue(fmt::format("{:.2f}", point_size_)); });
-
         ng::Vector3f min = points[0], max = points[0];
         for (auto& p : points)
         {
@@ -74,10 +59,29 @@ struct VertexModel: public Model
         shader_.uploadAttrib("position", positions);
     }
 
+    virtual void            init_window(ng::Window* window) override
+    {
+        Model::init_window(window);
+
+        auto panel = new ng::Widget(window);
+        panel->setLayout(new ng::BoxLayout(ng::Orientation::Horizontal, ng::Alignment::Middle, 0, 20));
+
+        auto slider = new ng::Slider(panel);
+        slider->setValue(point_size_/max_point_size_);
+        slider->setTooltip("point size");
+
+        auto textBox = new ng::TextBox(panel);
+        textBox->setFixedSize(ng::Vector2i(60, 25));
+        textBox->setValue(fmt::format("{:.2f}", point_size_));
+
+        slider->setCallback([this,textBox](float ps) { point_size_ = max_point_size_*ps; textBox->setValue(fmt::format("{:.2f}", point_size_)); });
+
+    }
+
     virtual void            draw(const ng::Matrix4f& mvp,
                                  const ng::Matrix4f& model,
                                  const ng::Matrix4f& view,
-                                 const ng::Matrix4f& projection) const
+                                 const ng::Matrix4f& projection) const override
     {
         if (visible())
         {
@@ -88,7 +92,7 @@ struct VertexModel: public Model
             shader_.drawIndexed(GL_POINTS, 0, n_);
         }
     }
-    virtual const BBox&     bbox() const                    { return bbox_; }
+    virtual const BBox&     bbox() const override           { return bbox_; }
 
     private:
                         VertexModel(const VertexModel&)   = delete;
@@ -99,12 +103,11 @@ struct VertexModel: public Model
         size_t                  n_;
         mutable ng::GLShader    shader_;
         float                   point_size_;
-        ng::Window*             window_;
         static constexpr float  max_point_size_ = 5.;
 };
 
 std::unique_ptr<Model>
-load_vertex_model(const std::string& fn, ng::Window* window)
+load_vertex_model(const std::string& fn)
 {
     typedef     VertexModel::Points     Points;
 
@@ -121,11 +124,11 @@ load_vertex_model(const std::string& fn, ng::Window* window)
         points.push_back({x,y,z});
     }
 
-    return std::unique_ptr<Model>(new VertexModel(fn, points, window));
+    return std::unique_ptr<Model>(new VertexModel(fn, points));
 }
 
 std::unique_ptr<Model>
-load_vertex_hdf5_model(const std::string& fn, ng::Window* window)
+load_vertex_hdf5_model(const std::string& fn)
 {
     typedef     VertexModel::Points     Points;
 
@@ -152,7 +155,7 @@ load_vertex_hdf5_model(const std::string& fn, ng::Window* window)
     for (size_t i = 0; i < xs.size(); ++i)
         points.push_back({xs[i], ys[i], zs[i]});
 
-    return std::unique_ptr<Model>(new VertexModel(fn, points, window));
+    return std::unique_ptr<Model>(new VertexModel(fn, points));
 }
 
 #endif

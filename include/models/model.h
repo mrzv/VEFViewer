@@ -12,11 +12,16 @@ struct Model
     typedef std::tuple<nanogui::Vector3f, nanogui::Vector3f>            BBox;
 
                             Model(const std::string& name,
-                                  nanogui::Window*   window,
                                   const ng::Color&   color = ng::Color(0.f, 0.f, 0.f, 1.f)):
+                                name_(name),
                                 color_(color)
+    {}
+
+    virtual                 ~Model()                                    {}
+
+    virtual void            init_window(ng::Window* window)
     {
-        new nanogui::Label(window, name);
+        new nanogui::Label(window, name_);
 
         tools_ = new ng::Widget(window);
         tools_->setLayout(new ng::BoxLayout(ng::Orientation::Horizontal, ng::Alignment::Middle, 0, 6));
@@ -32,8 +37,6 @@ struct Model
         color_wheel->setCallback([this](const nanogui::Color& color) { color_ = color; });
     }
 
-    virtual                 ~Model()                                    {}
-
     virtual void            draw(const ng::Matrix4f& mvp,
                                  const ng::Matrix4f& model,
                                  const ng::Matrix4f& view,
@@ -45,6 +48,7 @@ struct Model
     const ng::Vector4f&     color() const                               { return color_; }
 
     bool            visible_ = true;
+    std::string     name_;
     ng::Color       color_;
     ng::Widget*     tools_;
 };

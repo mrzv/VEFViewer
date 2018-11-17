@@ -18,9 +18,8 @@ struct SphereModel: public Model
     typedef         std::vector<Triangle>                               Triangles;
 
                     SphereModel(const std::string&      name,
-                                const Spheres&          spheres,
-                                ng::Window*             window):
-                        Model(name, window, ng::Color(1.f, 1.f, 0.f, 1.f)), window_(window),
+                                const Spheres&          spheres):
+                        Model(name, ng::Color(1.f, 1.f, 0.f, 1.f)),
                         spheres_(spheres)
     {
         ng::Vector3f min = ng::Vector3f { spheres[0][0], spheres[0][1], spheres[0][2] } - spheres[0][3] * ng::Vector3f { 1., 1., 1. },
@@ -35,12 +34,6 @@ struct SphereModel: public Model
                     min[i] = s[i] - s[3];
             }
         }
-
-        auto b = new ng::Button(tools_, "", ENTYPO_ICON_SHARE);
-        b->setFlags(nanogui::Button::ToggleButton);
-        b->setPushed(wireframe_);
-        b->setChangeCallback([this](bool state) { wireframe_ = state; });
-        b->setTooltip("wireframe");
 
         bbox_ = BBox { min, max };
 
@@ -89,10 +82,22 @@ struct SphereModel: public Model
         shader_.uploadAttrib("normal",   normals);
     }
 
+    virtual void            init_window(ng::Window* window) override
+    {
+        Model::init_window(window);
+
+        auto b = new ng::Button(tools_, "", ENTYPO_ICON_SHARE);
+        b->setFlags(nanogui::Button::ToggleButton);
+        b->setPushed(wireframe_);
+        b->setChangeCallback([this](bool state) { wireframe_ = state; });
+        b->setTooltip("wireframe");
+
+    }
+
     virtual void            draw(const ng::Matrix4f& mvp,
                                  const ng::Matrix4f& model,
                                  const ng::Matrix4f& view,
-                                 const ng::Matrix4f& projection) const
+                                 const ng::Matrix4f& projection) const override
     {
         if (visible())
         {
@@ -117,7 +122,7 @@ struct SphereModel: public Model
                 glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
     }
-    virtual const BBox&     bbox() const                    { return bbox_; }
+    virtual const BBox&     bbox() const override           { return bbox_; }
 
     private:
                         SphereModel(const SphereModel&)     = delete;
@@ -127,13 +132,12 @@ struct SphereModel: public Model
         BBox                    bbox_;
         size_t                  n_;
         mutable ng::GLShader    shader_;
-        ng::Window*             window_;
         Spheres                 spheres_;
         bool                    wireframe_ = false;
 };
 
 std::unique_ptr<Model>
-load_sphere_model(const std::string& fn, ng::Window* window)
+load_sphere_model(const std::string& fn)
 {
     typedef         std::vector<ng::Vector4f>   Spheres;
     Spheres         spheres;
@@ -149,7 +153,7 @@ load_sphere_model(const std::string& fn, ng::Window* window)
         spheres.push_back({x,y,z,r});
     }
 
-    return std::unique_ptr<Model>(new SphereModel(fn, spheres, window));
+    return std::unique_ptr<Model>(new SphereModel(fn, spheres));
 }
 
 #endif
