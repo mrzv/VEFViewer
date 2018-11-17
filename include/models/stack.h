@@ -37,12 +37,12 @@ struct Stack: public Model
         slider->setValue(0);
         slider->setTooltip("model");
 
-        auto intBox = new ng::IntBox<size_t>(panel);
+        auto intBox = new ng::IntBox<int>(panel);
         intBox->setFixedSize(ng::Vector2i(60, 25));
         intBox->setValue(i_);
         intBox->setMinMaxValues(0, models_.size() - 1);
         intBox->setSpinnable(true);
-        intBox->setCallback([this,slider](size_t i)
+        intBox->setCallback([this,slider](int i)
                             {
                                 i_ = i;
                                 slider->setValue(float(i_) / (models_.size() - 1));
