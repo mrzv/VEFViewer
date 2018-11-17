@@ -234,6 +234,9 @@ class VEFViewer: public ng::Screen
 
         virtual bool    scrollEvent(const ng::Vector2i &p, const ng::Vector2f &rel) override
         {
+            if (Screen::scrollEvent(p, rel))
+                return true;
+
             controls_.scrollEvent(p, rel);
             return true;
         }
