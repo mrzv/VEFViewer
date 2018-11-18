@@ -1,0 +1,35 @@
+imports:
+    HighFive: ./
+    zstr: ./
+    fmt: ./
+    opts: ./
+
+git module HighFive:
+    url: gh:BlueBrain/HighFive
+    pick:
+        - include
+        - licenses/LICENSE.HighFive
+    move:
+        LICENSE: licenses/LICENSE.HighFive
+
+git module zstr:
+    url: gh:mateidavid/zstr
+    move:
+        src: include/zstr
+        LICENSE: licenses/LICENSE.zstr
+    pick:
+        - include
+        - licenses/LICENSE.zstr
+
+git module fmt:
+    url: gh:fmtlib/fmt
+    pick:
+        - include
+        - src
+        - licenses/LICENSE.fmt
+    move:
+        LICENSE.rst: licenses/LICENSE.fmt
+
+git module opts:
+    url: gh:mrzv/opts
+    pick: include
