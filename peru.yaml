@@ -3,6 +3,7 @@ imports:
     zstr: ./
     fmt: ./
     opts: ./
+    nanogui: ./ext/nanogui
 
 git module HighFive:
     url: gh:BlueBrain/HighFive
@@ -37,3 +38,7 @@ git module opts:
     url: gh:mrzv/opts
     pick: include
     rev: 3f6a6637ac841f8f867fc0cba3e13258f6dc3300
+
+git module nanogui:
+    url: gh:wjakob/nanogui
+    rev: f6965514292388ce5582b8e3ad22e0bcc23f6590
