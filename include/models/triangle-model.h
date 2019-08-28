@@ -51,4 +51,7 @@ load_stl_model(const std::string& fn);
 std::unique_ptr<Model>
 load_triangle_hdf5_model(const std::string& fn);
 
+std::unique_ptr<Model>
+load_ply_model(const std::string& fn);
+
 #endif

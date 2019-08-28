@@ -58,6 +58,8 @@ load_model_by_filetype(const std::string& fn)
         return load_stl_model(fn);
     else if (ends_with(fn, ".sph") || ends_with(fn, ".sph.gz"))
         return load_sphere_model(fn);
+    else if (ends_with(fn, ".ply"))
+        return load_ply_model(fn);
 
     fmt::print(std::cerr, "Unknown file type: {}\n", fn);
     return 0;

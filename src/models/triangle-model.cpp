@@ -1,6 +1,7 @@
 #include <models/triangle-model.h>
 #include <fmt/format.h>
 #include <highfive/H5File.hpp>
+#include <happly.h>
 
 extern unsigned char triangle_vrt[];
 extern unsigned int  triangle_vrt_len;
@@ -243,3 +244,31 @@ load_triangle_hdf5_model(const std::string& fn)
 
     return std::unique_ptr<Model>(new TriangleModel(fn, points, triangles));
 }
+
+std::unique_ptr<Model>
+load_ply_model(const std::string& fn)
+{
+    using Points    = TriangleModel::Points;
+    using Triangles = TriangleModel::Triangles;
+
+    // Construct the data object by reading from file
+    happly::PLYData plyIn(fn);
+
+    Points points;
+    std::vector<std::array<double, 3>> vPos = plyIn.getVertexPositions();
+    for(auto& p : vPos)
+        points.emplace_back(p[0], p[1], p[2]);
+
+    Triangles triangles;
+    std::vector<std::vector<size_t>>   fInd = plyIn.getFaceIndices<size_t>();
+    for (auto& t : fInd)
+    {
+        if (t.size() != 3)
+            throw std::runtime_error(fmt::format("Cannot read from {} a face with {} vertices", fn, t.size()));
+
+        triangles.emplace_back(t[0], t[1], t[2]);
+    }
+
+    return std::unique_ptr<Model>(new TriangleModel(fn, points, triangles));
+}
+
