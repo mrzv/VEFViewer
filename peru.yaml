@@ -12,7 +12,7 @@ git module HighFive:
         - licenses/LICENSE.HighFive
     move:
         LICENSE: licenses/LICENSE.HighFive
-    rev: a06a59c771e7827c93ffba7cb8064a179bdda0cd
+    rev: 036cfa12381ef16c79ca8ebec20f7d4b7c5afcc2
 
 git module zstr:
     url: gh:mateidavid/zstr
@@ -32,7 +32,7 @@ git module fmt:
         - licenses/LICENSE.fmt
     move:
         LICENSE.rst: licenses/LICENSE.fmt
-    rev: 6c95fb35623e47562fdc7f6d8023688290b6f786
+    rev: 79c923ba2c6e6c95c806a0b1fa4c0e78e7aa1e02
 
 git module opts:
     url: gh:mrzv/opts
