@@ -1,4 +1,4 @@
-cmake_minimum_required  (VERSION 3.0.2)
+cmake_minimum_required  (VERSION 3.1)
 project                 (VEFViewer)
 
 # Default to Release
@@ -20,11 +20,11 @@ set                     (NANOGUI_LIBRARY nanogui)
 include_directories     (${CMAKE_SOURCE_DIR}/include
                          ${NANOGUI_DIR}/include
                          SYSTEM ${NANOGUI_DIR}/ext/eigen
+                         SYSTEM ${NANOGUI_DIR}/ext/glfw/include
                          ${NANOGUI_DIR}/ext/nanovg/src)
 
-set                     (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 if                      (APPLE)
-  set                   (CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++")
+  set                   (CMAKE_CXX_FLAGS "-stdlib=libc++")
   # Find standard libraries needed for OpenGL/GLFW
   find_library          (cocoa_library Cocoa)
   find_library          (opengl_library OpenGL)
@@ -33,7 +33,7 @@ if                      (APPLE)
   set                   (extra_libs ${cocoa_library} ${opengl_library} ${corevideo_library} ${iokit_library})
   set                   (extra_source src/darwin.mm)
 elseif                  ("${CMAKE_SYSTEM}" MATCHES "Linux")
-  set                   (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+  set                   (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
   set                   (extra_libs GL Xxf86vm Xrandr Xinerama Xcursor Xi X11 pthread dl)
 endif                   ()
 
