@@ -346,7 +346,10 @@ int main(int argc, char *argv[])
 
         std::string fn;
         while (ops >> PosOption(fn))
+        {
+            fmt::print("Reading {}\n", fn);
             models.emplace_back(load_model_by_filetype(fn));
+        }
 
         if (!stack)
         {
