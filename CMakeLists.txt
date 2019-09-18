@@ -1,8 +1,22 @@
 cmake_minimum_required  (VERSION 3.0.2)
 project                 (VEFViewer)
 
-find_path               (NANOGUI_DIR            include/nanogui/nanogui.h)
-find_library            (NANOGUI_LIBRARY        nanogui)
+# Default to Release
+if                      (NOT CMAKE_BUILD_TYPE)
+    set                 (CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel." FORCE)
+    set_property        (CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+endif                   (NOT CMAKE_BUILD_TYPE)
+
+set                     (CMAKE_CXX_STANDARD 11)
+
+set                     (NANOGUI_DIR            ext/nanogui)
+set                     (NANOGUI_BUILD_EXAMPLE  OFF CACHE BOOL " " FORCE)
+set                     (NANOGUI_BUILD_PYTHON   OFF CACHE BOOL " " FORCE)
+set                     (NANOGUI_BUILD_SHARED   OFF CACHE BOOL " " FORCE)
+set                     (NANOGUI_INSTALL        OFF CACHE BOOL " " FORCE)
+add_subdirectory        (${NANOGUI_DIR})
+
+set                     (NANOGUI_LIBRARY nanogui)
 include_directories     (${CMAKE_SOURCE_DIR}/include
                          ${NANOGUI_DIR}/include
                          SYSTEM ${NANOGUI_DIR}/ext/eigen

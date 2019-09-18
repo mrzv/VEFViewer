@@ -34,7 +34,7 @@ namespace HighFive {
 inline Attribute::Attribute() {}
 
 inline size_t Attribute::getStorageSize() const {
-    return H5Aget_storage_size(_hid);
+    return static_cast<size_t>(H5Aget_storage_size(_hid));
 }
 
 inline DataType Attribute::getDataType() const {
@@ -56,7 +56,7 @@ inline DataSpace Attribute::getMemSpace() const { return getSpace(); }
 
 template <typename T>
 inline void Attribute::read(T& array) const {
-    typedef typename details::remove_const<T>::type type_no_const;
+    typedef typename std::remove_const<T>::type type_no_const;
 
     type_no_const& nocv_array = const_cast<type_no_const&>(array);
 
@@ -91,7 +91,7 @@ inline void Attribute::read(T& array) const {
 
 template <typename T>
 inline void Attribute::write(const T& buffer) {
-    typedef typename details::remove_const<T>::type type_no_const;
+    typedef typename std::remove_const<T>::type type_no_const;
 
     type_no_const& nocv_buffer = const_cast<type_no_const&>(buffer);
 

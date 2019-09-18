@@ -9,8 +9,10 @@
 #ifndef H5FILE_MISC_HPP
 #define H5FILE_MISC_HPP
 
+#include <string>
 #include "../H5Exception.hpp"
 #include "../H5File.hpp"
+#include "../H5Utility.hpp"
 
 #include <H5Fpublic.h>
 
@@ -20,8 +22,8 @@ namespace {
 
 // libhdf5 uses a preprocessor trick on their oflags
 // we can not declare them constant without a mapper
-inline int convert_open_flag(int openFlags) {
-    int res_open = 0;
+inline unsigned convert_open_flag(unsigned openFlags) {
+    unsigned res_open = 0;
     if (openFlags & File::ReadOnly)
         res_open |= H5F_ACC_RDONLY;
     if (openFlags & File::ReadWrite)
@@ -34,26 +36,43 @@ inline int convert_open_flag(int openFlags) {
         res_open |= H5F_ACC_EXCL;
     return res_open;
 }
-}
+}  // namespace
 
-inline File::File(const std::string& filename, int openFlags,
-                  const FileDriver& driver)
+inline File::File(const std::string& filename, unsigned openFlags,
+                  const FileAccessProps& fileAccessProps)
     : _filename(filename) {
 
     openFlags = convert_open_flag(openFlags);
 
-    if (openFlags & H5F_ACC_CREAT) {
-        if ((_hid = H5Fcreate(_filename.c_str(), openFlags & (H5F_ACC_TRUNC),
-                              H5P_DEFAULT, driver.getId())) < 0) {
-            HDF5ErrMapper::ToException<FileException>(
-                std::string("Unable to create file " + _filename));
-        }
-    } else {
-        if ((_hid = H5Fopen(_filename.c_str(), openFlags, driver.getId())) <
-            0) {
+    unsigned createMode = openFlags & (H5F_ACC_TRUNC | H5F_ACC_EXCL);
+    unsigned openMode = openFlags & (H5F_ACC_RDWR | H5F_ACC_RDONLY);
+    bool mustCreate = createMode > 0;
+    bool openOrCreate = (openFlags & H5F_ACC_CREAT) > 0;
+
+    // open is default. It's skipped only if flags require creation
+    // If open fails it will try create() if H5F_ACC_CREAT is set
+    if (!mustCreate) {
+        // Silence open errors if create is allowed
+        std::unique_ptr<SilenceHDF5> silencer;
+        if (openOrCreate) silencer.reset(new SilenceHDF5());
+
+        _hid = H5Fopen(_filename.c_str(), openMode, fileAccessProps.getId());
+
+        if (isValid()) return;  // Done
+
+        if (openOrCreate) {
+            // Will attempt to create ensuring wont clobber any file
+            createMode = H5F_ACC_EXCL;
+        } else {
             HDF5ErrMapper::ToException<FileException>(
                 std::string("Unable to open file " + _filename));
         }
+    }
+
+    if ((_hid = H5Fcreate(_filename.c_str(), createMode, H5P_DEFAULT,
+                          fileAccessProps.getId())) < 0) {
+        HDF5ErrMapper::ToException<FileException>(
+            std::string("Unable to create file " + _filename));
     }
 }
 
@@ -67,6 +86,6 @@ inline void File::flush() {
             std::string("Unable to flush file " + _filename));
     }
 }
-}
+}  // namespace HighFive
 
-#endif // H5FILE_MISC_HPP
+#endif  // H5FILE_MISC_HPP

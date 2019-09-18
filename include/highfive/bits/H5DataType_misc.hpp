@@ -10,6 +10,7 @@
 #define H5DATATYPE_MISC_HPP
 
 #include <string>
+#include <complex>
 
 #include "../H5DataType.hpp"
 #include "../H5Exception.hpp"
@@ -62,7 +63,7 @@ inline AtomicType<int>::AtomicType() {
 }
 
 template <>
-inline AtomicType<unsigned int>::AtomicType() {
+inline AtomicType<unsigned>::AtomicType() {
     _hid = H5Tcopy(H5T_NATIVE_UINT);
 }
 
@@ -116,6 +117,26 @@ inline AtomicType<std::string>::AtomicType() {
     // define encoding to UTF-8 by default
     H5Tset_cset(_hid, H5T_CSET_UTF8);
 }
+
+template <>
+inline AtomicType<std::complex<double> >::AtomicType()
+{
+    static struct ComplexType : public Object
+    {
+        ComplexType()
+        {
+            _hid = H5Tcreate(H5T_COMPOUND, sizeof(std::complex<double>));
+            // h5py/numpy compatible datatype
+            H5Tinsert(_hid, "r", 0, H5T_NATIVE_DOUBLE);
+            H5Tinsert(_hid, "i", sizeof(double), H5T_NATIVE_DOUBLE);
+        };
+    } complexType;
+    _hid = H5Tcopy(complexType.getId());
 }
+
+}
+
+
+
 
 #endif // H5DATATYPE_MISC_HPP

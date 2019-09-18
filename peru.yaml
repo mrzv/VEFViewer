@@ -1,0 +1,44 @@
+imports:
+    HighFive: ./
+    zstr: ./
+    fmt: ./
+    opts: ./
+    nanogui: ./ext/nanogui
+
+git module HighFive:
+    url: gh:BlueBrain/HighFive
+    pick:
+        - include
+        - licenses/LICENSE.HighFive
+    move:
+        LICENSE: licenses/LICENSE.HighFive
+    rev: 036cfa12381ef16c79ca8ebec20f7d4b7c5afcc2
+
+git module zstr:
+    url: gh:mateidavid/zstr
+    move:
+        src: include/zstr
+        LICENSE: licenses/LICENSE.zstr
+    pick:
+        - include
+        - licenses/LICENSE.zstr
+    rev: 6811097c924346e463b058d63684629bcc5651e0
+
+git module fmt:
+    url: gh:fmtlib/fmt
+    pick:
+        - include
+        - src
+        - licenses/LICENSE.fmt
+    move:
+        LICENSE.rst: licenses/LICENSE.fmt
+    rev: 79c923ba2c6e6c95c806a0b1fa4c0e78e7aa1e02
+
+git module opts:
+    url: gh:mrzv/opts
+    pick: include
+    rev: 3f6a6637ac841f8f867fc0cba3e13258f6dc3300
+
+git module nanogui:
+    url: gh:wjakob/nanogui
+    rev: f6965514292388ce5582b8e3ad22e0bcc23f6590
