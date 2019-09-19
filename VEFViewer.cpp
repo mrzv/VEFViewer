@@ -31,8 +31,6 @@
 #include <models/sphere-model.h>
 #include <models/stack.h>
 
-namespace   ng = nanogui;
-
 bool ends_with(const std::string& s, const std::string& ending)
 {
     if (s.length() >= ending.length())

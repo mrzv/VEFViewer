@@ -65,5 +65,11 @@ foreach                 (shader_source ${shader_sources})
 endforeach              ()
 
 add_library             (format         src/format.cc src/posix.cc)
-add_executable          (VEFViewer      VEFViewer.cpp  ${shaders} src/parse_stl.cpp)
+add_executable          (VEFViewer      VEFViewer.cpp  ${shaders} src/parse_stl.cpp
+                                        src/models/model.cpp
+                                        src/models/vertex-model.cpp
+                                        src/models/edge-model.cpp
+                                        src/models/triangle-model.cpp
+                                        src/models/sphere-model.cpp
+                                        src/models/stack.cpp)
 target_link_libraries   (VEFViewer      format ${NANOGUI_LIBRARY} ${extra_libs} ${ZLIB_LIBRARIES} ${HDF5_C_LIBRARIES})
