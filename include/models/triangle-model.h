@@ -35,12 +35,6 @@ struct TriangleModel: public Model
             }
         }
 
-        auto b = new ng::Button(tools_, "", ENTYPO_ICON_SHARE);
-        b->setFlags(nanogui::Button::ToggleButton);
-        b->setPushed(wireframe_);
-        b->setChangeCallback([this](bool state) { wireframe_ = state; });
-        b->setTooltip("wireframe");
-
         bbox_ = BBox { min, max };
 
         //shader_.initFromFiles(name, "vertex.glsl", "fragment.glsl");
@@ -79,6 +73,17 @@ struct TriangleModel: public Model
         shader_.uploadIndices(indices);
         shader_.uploadAttrib("position", positions);
         shader_.uploadAttrib("normal",   normals);
+    }
+
+    virtual void            init_window(ng::Window* window) override
+    {
+        Model::init_window(window);
+
+        auto b = new ng::Button(tools_, "", ENTYPO_ICON_SHARE);
+        b->setFlags(nanogui::Button::ToggleButton);
+        b->setPushed(wireframe_);
+        b->setChangeCallback([this](bool state) { wireframe_ = state; });
+        b->setTooltip("wireframe");
     }
 
     virtual void            draw(const ng::Matrix4f& mvp,
