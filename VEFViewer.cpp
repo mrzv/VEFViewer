@@ -50,6 +50,8 @@ load_model_by_filetype(const std::string& fn)
         return load_vertex_hdf5_model(fn);
     else if (ends_with(fn, ".edg") || ends_with(fn, ".edg.gz"))
         return load_edge_model(fn);
+    else if (ends_with(fn, ".strm") || ends_with(fn, ".strm.gz"))
+        return load_stream_model(fn);
     else if (ends_with(fn, ".tri") || ends_with(fn, ".tri.gz"))
         return load_triangle_model(fn);
     else if (ends_with(fn, ".obj") || ends_with(fn, ".obj.gz"))
@@ -299,6 +301,7 @@ int main(int argc, char *argv[])
     std::vector<std::string>    vertex_filenames,
                                 triangle_filenames,
                                 edge_filenames,
+                                stream_filenames,
                                 object_filenames,
                                 sphere_filenames;
     bool stack;
@@ -307,6 +310,7 @@ int main(int argc, char *argv[])
         >> Option('v', "vertex",    vertex_filenames,   "vertex file")
         >> Option('t', "triangle",  triangle_filenames, "triangle file")
         >> Option('e', "edge",      edge_filenames,     "edge file")
+        >> Option(     "stream",    stream_filenames,   "stream file")
         >> Option('o', "object",    object_filenames,   "object file")
         >> Option('s', "sphere",    sphere_filenames,   "sphere file")
         >> Option(     "stack",     stack,              "stack models")
@@ -339,6 +343,8 @@ int main(int argc, char *argv[])
             models.emplace_back(load_triangle_model(fn));
         for (auto& fn : edge_filenames)
             models.emplace_back(load_edge_model(fn));
+        for (auto& fn : stream_filenames)
+            models.emplace_back(load_stream_model(fn));
         for (auto& fn : object_filenames)
             models.emplace_back(load_object_model(fn));
         for (auto& fn : sphere_filenames)

@@ -46,4 +46,7 @@ struct EdgeModel: public Model
 std::unique_ptr<Model>
 load_edge_model(const std::string& fn);
 
+std::unique_ptr<Model>
+load_stream_model(const std::string& fn);
+
 #endif

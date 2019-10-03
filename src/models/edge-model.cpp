@@ -106,3 +106,41 @@ load_edge_model(const std::string& fn)
 
     return std::unique_ptr<Model>(new EdgeModel(fn, points, edges));
 }
+
+std::unique_ptr<Model>
+load_stream_model(const std::string& fn)
+{
+    typedef     EdgeModel::Points      Points;
+    typedef     EdgeModel::Edges       Edges;
+    typedef     EdgeModel::Edge        Edge;
+
+    Points          points;
+    Edges           edges;
+
+    zstr::ifstream  in(fn.c_str());
+    std::string     line;
+
+    size_t i = 0;
+    while (std::getline(in, line))
+    {
+        if (line[0] == '#') continue;
+        std::istringstream  iss(line);
+        float x1,y1,z1;
+        float x2,y2,z2;
+
+        iss >> x1 >> y1 >> z1;
+        points.emplace_back(x1,y1,z1);
+        ++i;
+
+        while(iss >> x2 >> y2 >> z2)
+        {
+            points.emplace_back(x2,y2,z2);
+            ++i;
+            edges.emplace_back(i - 1, i);
+
+            x1 = x2; y1 = y2; z1 = z2;
+        }
+    }
+
+    return std::unique_ptr<Model>(new EdgeModel(fn, points, edges));
+}
