@@ -135,8 +135,8 @@ load_stream_model(const std::string& fn)
         while(iss >> x2 >> y2 >> z2)
         {
             points.emplace_back(x2,y2,z2);
-            ++i;
             edges.emplace_back(i - 1, i);
+            ++i;
 
             x1 = x2; y1 = y2; z1 = z2;
         }
