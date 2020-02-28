@@ -2,6 +2,7 @@
 #include <fmt/format.h>
 #include <highfive/H5File.hpp>
 #include <happly.h>
+#include <nano_obj.h>
 
 extern unsigned char triangle_vrt[];
 extern unsigned int  triangle_vrt_len;
@@ -150,27 +151,16 @@ load_object_model(const std::string& fn)
     Triangles       triangles;
 
     zstr::ifstream  in(fn.c_str());
-    std::string     line;
 
-    while (std::getline(in, line))
+    obj::mesh m = obj::read(in);
+    for (auto& v : m.vertices)
+        points.push_back({v.x, v.y, v.z});
+
+    for (auto& f : m.faces)
     {
-        if (line[0] == '#') continue;
-        if (line.empty()) continue;
-
-        std::istringstream  iss(line);
-        char t;
-        iss >> t;
-        if (t == 'v')
-        {
-            float x,y,z;
-            iss >> x >> y >> z;
-            points.push_back({x,y,z});
-        } else if (t == 'f')
-        {
-            int i,j,k;
-            iss >> i >> j >> k;
-            triangles.push_back(Triangle { i - 1, j - 1, k - 1 });
-        }
+        if (f.vertices.size() != 3)
+            throw std::runtime_error(fmt::format("Cannot read from {} a face with {} vertices", fn, f.vertices.size()));
+        triangles.push_back(Triangle { f.vertices[0].v, f.vertices[1].v, f.vertices[2].v });
     }
 
     return std::unique_ptr<Model>(new TriangleModel(fn, points, triangles));

@@ -65,7 +65,7 @@ foreach                 (shader_source ${shader_sources})
 endforeach              ()
 
 add_library             (format         src/format.cc src/posix.cc)
-add_executable          (VEFViewer      VEFViewer.cpp  ${shaders} src/parse_stl.cpp
+add_executable          (VEFViewer      VEFViewer.cpp  ${shaders} src/parse_stl.cpp src/nano_obj.cc
                                         src/models/model.cpp
                                         src/models/vertex-model.cpp
                                         src/models/edge-model.cpp

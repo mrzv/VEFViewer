@@ -28,5 +28,5 @@ namespace obj
 		std::vector<face> faces;
 	};
 
-	void read(mesh& m, const char* filename);
+	mesh read(std::istream& is);
 }
