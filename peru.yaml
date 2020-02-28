@@ -4,6 +4,7 @@ imports:
     fmt: ./
     opts: ./
     nanogui: ./ext/nanogui
+    nano-obj: ./
 
 git module HighFive:
     url: gh:BlueBrain/HighFive
@@ -42,3 +43,13 @@ git module opts:
 git module nanogui:
     url: gh:wjakob/nanogui
     rev: f6965514292388ce5582b8e3ad22e0bcc23f6590
+
+git module nano-obj:
+    url: gh:Dormin/nano-obj
+    move:
+        nano_obj.h: include/nano_obj.h
+        nano_obj.cc: src/nano_obj.cc
+    pick:
+        - include
+        - src
+    rev: cbe71771020b9602bc3d06d80c7d8a048b9a6698
